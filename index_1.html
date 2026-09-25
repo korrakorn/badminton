@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>จัดคู่ตีแบด</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#F2F5F1; --surface:#FFFFFF; --sunk:#E8EEE9; --ink:#15221C; --muted:#5A6A62; --line:#D6DFD8;
+  --court:#1D6A50; --court-2:#237C5E; --court-line:rgba(255,255,255,.85); --on-court:#FFFFFF;
+  --done:#DCE3DE; --done-ink:#5A6A62;
+  --accent:#1D6A50; --accent-ink:#FFFFFF; --next:#B7801A; --next-bg:#FBF0DA;
+  --l1:#3F7CC4; --l1-bg:#E4EEF9; --l2:#B7801A; --l2-bg:#FBF0DA; --l3:#C2433A; --l3-bg:#FBE4E1;
+  --danger:#B63A31;
+  --display:"Chakra Petch","IBM Plex Sans Thai",system-ui,sans-serif;
+  --body:"IBM Plex Sans Thai",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0E1613; --surface:#16211C; --sunk:#1C2A24; --ink:#E5EEE9; --muted:#95A79D; --line:#2A3A33;
+    --court:#1B5A45; --court-2:#206A51; --court-line:rgba(255,255,255,.7);
+    --done:#1C2A24; --done-ink:#95A79D;
+    --accent:#45B08A; --accent-ink:#08130F; --next:#E2B04E; --next-bg:#342A16;
+    --l1:#7FB0EA; --l1-bg:#1C2B3D; --l2:#E2B04E; --l2-bg:#342A16; --l3:#EE7D73; --l3-bg:#3A1F1C;
+    --danger:#EE7D73;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0E1613; --surface:#16211C; --sunk:#1C2A24; --ink:#E5EEE9; --muted:#95A79D; --line:#2A3A33;
+  --court:#1B5A45; --court-2:#206A51; --court-line:rgba(255,255,255,.7);
+  --done:#1C2A24; --done-ink:#95A79D;
+  --accent:#45B08A; --accent-ink:#08130F; --next:#E2B04E; --next-bg:#342A16;
+  --l1:#7FB0EA; --l1-bg:#1C2B3D; --l2:#E2B04E; --l2-bg:#342A16; --l3:#EE7D73; --l3-bg:#3A1F1C;
+  --danger:#EE7D73;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;padding:20px 16px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+h1{font-family:var(--display);font-weight:700;font-size:30px;line-height:1.1;margin:0;letter-spacing:.01em;text-wrap:balance}
+h1 small{display:block;font-family:var(--body);font-weight:400;font-size:14px;color:var(--muted);margin-top:4px;letter-spacing:0}
+h2{font-family:var(--display);font-weight:600;font-size:18px;margin:0;text-wrap:balance}
+.grid{display:grid;grid-template-columns:minmax(0,360px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:14px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.between{justify-content:space-between}
+.label{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.muted{color:var(--muted)}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums}
+input[type=text],textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+textarea{width:100%;resize:vertical;min-height:84px}
+input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 12px;font-weight:500}
+button:hover{background:var(--sunk)}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.primary:hover{filter:brightness(1.07)}
+button.ghost{border-color:transparent;background:transparent;padding:6px 8px}
+button.danger{color:var(--danger)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.setting{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.setting .note{margin-top:2px}
+.stepper{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex:none}
+.stepper button{border:0;border-radius:0;width:36px;padding:6px 0;font-size:18px;line-height:1}
+.stepper output{min-width:40px;text-align:center;font-size:19px;font-weight:600}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;border-radius:0;padding:4px 0;width:30px;font-family:var(--display);font-weight:600;background:transparent;color:var(--muted)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed=true].l1{background:var(--l1-bg);color:var(--l1)}
+.seg button[aria-pressed=true].l2{background:var(--l2-bg);color:var(--l2)}
+.seg button[aria-pressed=true].l3{background:var(--l3-bg);color:var(--l3)}
+.players{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.players li{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:6px 0;border-top:1px solid var(--line)}
+.players li:first-child{border-top:0}
+.players li.off .pname{color:var(--muted);text-decoration:line-through}
+.players input[type=text]{border-color:transparent;background:transparent;padding:4px 6px;width:100%}
+.players input[type=text]:hover{border-color:var(--line)}
+.chk{width:18px;height:18px;accent-color:var(--accent)}
+.lv{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;border-radius:5px;font-family:var(--display);font-weight:700;font-size:12px;padding:0 4px;font-style:normal;flex:none}
+.lv.l1{background:var(--l1-bg);color:var(--l1)} .lv.l2{background:var(--l2-bg);color:var(--l2)} .lv.l3{background:var(--l3-bg);color:var(--l3)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+details summary{cursor:pointer;color:var(--muted);font-size:14px}
+details[open] summary{margin-bottom:8px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.toolbar .spacer{flex:1}
+.note{font-size:13px;color:var(--muted)}
+.resting{font-size:14px;background:var(--sunk);border-radius:8px;padding:8px 12px}
+.resting b{font-weight:600}
+
+/* queue */
+.queue{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.m{display:grid;grid-template-columns:56px minmax(0,1fr) 112px;gap:10px;align-items:center}
+.m .no{font-family:var(--display);font-weight:700;font-size:22px;line-height:1;text-align:center;font-variant-numeric:tabular-nums}
+.m .no small{display:block;font-family:var(--body);font-size:11px;font-weight:500;color:var(--muted);margin-top:4px}
+.court{position:relative;border-radius:7px;overflow:hidden;background:linear-gradient(90deg,var(--court) 0 50%,var(--court-2) 50% 100%);color:var(--on-court);display:grid;grid-template-columns:1fr 1fr;border:2px solid var(--court-line)}
+.court::before{content:"";position:absolute;left:50%;top:0;bottom:0;border-left:2px dashed var(--court-line);transform:translateX(-1px)}
+.court .vs{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--court-line);color:var(--court);font-family:var(--display);font-weight:700;font-size:10px;padding:0 5px;border-radius:4px;z-index:2}
+.side{position:relative;z-index:1;display:flex;flex-direction:column;gap:3px;padding:8px 20px 8px 10px;min-width:0}
+.side.b{align-items:flex-end;text-align:right;padding:8px 10px 8px 20px}
+.pl{display:flex;align-items:center;gap:6px;font-weight:600;font-size:15px;max-width:100%}
+.side.b .pl{flex-direction:row-reverse}
+.pl .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sum{font-size:10px;opacity:.75;font-family:var(--display)}
+.act{display:flex;flex-direction:column;align-items:stretch;gap:4px}
+.chip{font-size:12px;font-weight:600;border-radius:999px;padding:1px 10px;text-align:center}
+.chip.playing{background:var(--accent);color:var(--accent-ink)}
+.chip.next{background:var(--next-bg);color:var(--next)}
+.chip.wait{background:var(--sunk);color:var(--muted)}
+.chip.done{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.act button{padding:4px 8px;font-size:13px}
+.m.done .court{background:var(--done);color:var(--done-ink);border-color:var(--line)}
+.m.done .court::before{border-left-color:var(--line)}
+.m.done .court .vs{background:var(--line);color:var(--done-ink)}
+.m.done .no{color:var(--muted)}
+.m.playing .no{color:var(--accent)}
+.divider{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);letter-spacing:.04em;margin:6px 0 2px}
+.divider::after{content:"";flex:1;border-top:1px solid var(--line)}
+@media (max-width:520px){
+  .m{grid-template-columns:40px minmax(0,1fr)}
+  .m .act{grid-column:2;flex-direction:row;align-items:center;justify-content:space-between}
+  .m .no{font-size:18px}
+}
+.empty{padding:28px 12px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:10px}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.04em}
+td.num,th.num{text-align:right}
+.bar{display:inline-block;height:6px;border-radius:3px;background:var(--accent);vertical-align:middle;margin-left:6px;opacity:.7}
+.confirm{display:inline-flex;gap:6px;align-items:center;font-size:14px;flex-wrap:wrap}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:14px;z-index:10}
+.copybox{width:100%;min-height:160px;font-family:ui-monospace,monospace;font-size:13px}
+img{max-width:100%}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>จัดคู่ตีแบด<small>แบดมินตันประเภทคู่ · จัดคิวแมตช์เรียงลำดับ สนามไหนว่างก็เรียกแมตช์ถัดไปลง</small></h1>
+    <div class="legend">
+      <span><i class="lv l1">1</i>มือใหม่</span>
+      <span><i class="lv l2">2</i>กลาง</span>
+      <span><i class="lv l3">3</i>เก่ง</span>
+    </div>
+  </header>
+
+  <div class="grid">
+    <section class="panel" aria-label="ตั้งค่า">
+      <div class="setting">
+        <div><div class="label">จำนวนสนาม</div><div class="note">คนในแมตช์ที่เล่นพร้อมกันจะไม่ซ้ำกัน</div></div>
+        <div class="stepper"><button id="courtMinus" aria-label="ลดสนาม">−</button><output id="courtOut" class="num">2</output><button id="courtPlus" aria-label="เพิ่มสนาม">+</button></div>
+      </div>
+      <div class="setting">
+        <div><div class="label">จัดคิวล่วงหน้า</div><div class="note">จำนวนแมตช์ที่รอคิวไว้ให้ดู</div></div>
+        <div class="stepper"><button id="aheadMinus" aria-label="ลดคิว">−</button><output id="aheadOut" class="num">6</output><button id="aheadPlus" aria-label="เพิ่มคิว">+</button></div>
+      </div>
+
+      <div class="row between">
+        <div class="label">ผู้เล่น <span id="countNote" class="muted" style="text-transform:none;letter-spacing:0;font-weight:400"></span></div>
+        <div class="row" style="gap:4px"><button class="ghost" id="allOn">มาทั้งหมด</button><button class="ghost" id="allOff">ไม่มาทั้งหมด</button></div>
+      </div>
+
+      <form class="row" id="addForm" autocomplete="off">
+        <input type="text" id="newName" placeholder="ชื่อผู้เล่น" style="flex:1" aria-label="ชื่อผู้เล่นใหม่">
+        <div class="seg" id="newLevel" role="group" aria-label="ระดับ"></div>
+        <button class="primary" type="submit">เพิ่ม</button>
+      </form>
+
+      <ul class="players" id="playerList"></ul>
+
+      <details>
+        <summary>วางรายชื่อหลายคนพร้อมกัน</summary>
+        <textarea id="bulkText" placeholder="บรรทัดละคน ใส่ระดับต่อท้ายได้&#10;ต้น 3&#10;แพร 2&#10;บอล"></textarea>
+        <div class="row" style="margin-top:8px"><button id="bulkAdd">เพิ่มรายชื่อ</button><span class="note">ไม่ใส่ระดับ = 2</span></div>
+      </details>
+
+      <p class="note" style="margin:0">ติ๊กช่องหน้าชื่อ = มาเล่นอยู่ · แก้รายชื่อหรือระดับเมื่อไหร่ คิวที่ยังไม่ลงจะจัดใหม่ให้อัตโนมัติ แมตช์ที่กำลังเล่นจะไม่ถูกเปลี่ยน · คนมาสายจะเริ่มนับเกมเท่ากับคนที่เล่นน้อยสุด</p>
+    </section>
+
+    <section class="panel" aria-label="คิวแมตช์">
+      <div class="toolbar">
+        <h2>คิวแมตช์</h2>
+        <span class="spacer"></span>
+        <button id="rerollBtn">สุ่มคิวที่รออยู่ใหม่</button>
+        <button id="copyBtn">คัดลอกคิว</button>
+        <span id="resetWrap"></span>
+      </div>
+      <div id="warn" class="note" hidden></div>
+      <div id="restNow" class="resting" hidden></div>
+      <div id="copyWrap" hidden><textarea class="copybox" id="copyText" readonly aria-label="ข้อความคิว"></textarea></div>
+      <div id="queueWrap"></div>
+      <p class="note" style="margin:0">สนามไหนเล่นจบ กด “จบแล้ว” ที่แมตช์นั้น แล้วเรียกแมตช์ “ถัดไป” ลงสนามที่ว่างได้เลย</p>
+    </section>
+  </div>
+
+  <section class="panel" aria-label="สถิติ">
+    <div class="row between"><h2>สรุปรายคน</h2><span class="note" id="fairNote"></span></div>
+    <div class="tablewrap"><table id="stats"></table></div>
+  </section>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+const KEY='badminton-queue-v2', OLD='badminton-doubles-v1';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const SAMPLE=[['ต้น',3],['บอล',3],['แพร',2],['มิ้นท์',2],['เจ',2],['ฟ้า',1],['โอ๊ต',2],['นิว',1],['แบงค์',3],['ปุ้ย',1],['เก่ง',2]];
+let S=null, newLevel=2;
+
+function load(){try{const r=localStorage.getItem(KEY);return r?JSON.parse(r):null}catch(e){return null}}
+function loadOldPlayers(){try{const r=JSON.parse(localStorage.getItem(OLD)||'null');return r&&Array.isArray(r.players)?r.players.filter(p=>!p.deleted).map(p=>({...p,offset:0})):null}catch(e){return null}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+const P=id=>S.players.find(p=>p.id===id);
+const nameOf=id=>{const p=P(id);return p?p.name:'?'};
+const lvOf=id=>{const p=P(id);return p?p.level:2};
+const active=()=>S.players.filter(p=>p.active&&!p.deleted);
+const effCourts=()=>Math.max(1,Math.min(S.courts,Math.floor(active().length/4)));
+const ids=m=>[...m.a,...m.b];
+
+/* status of each match: done / playing / next / wait */
+function statuses(){
+  const ec=effCourts(); let k=0; const out=[];
+  S.matches.forEach(m=>{ if(m.done){out.push('done');return} out.push(k<ec?'playing':(k===ec?'next':'wait')); k++; });
+  return out;
+}
+const isLocked=(st)=>st==='done'||st==='playing';
+function trimToLocked(){const st=statuses();S.matches=S.matches.filter((m,i)=>isLocked(st[i]))}
+function waitingCount(){return statuses().filter(s=>s==='next'||s==='wait').length}
+
+function history(){
+  const g={},last={},partner={},opp={};
+  const inc=(m,a,b)=>{(m[a]=m[a]||{})[b]=(m[a][b]||0)+1};
+  S.matches.forEach((m,i)=>{
+    ids(m).forEach(id=>{g[id]=(g[id]||0)+1;last[id]=i});
+    inc(partner,m.a[0],m.a[1]);inc(partner,m.a[1],m.a[0]);inc(partner,m.b[0],m.b[1]);inc(partner,m.b[1],m.b[0]);
+    m.a.forEach(x=>m.b.forEach(y=>{inc(opp,x,y);inc(opp,y,x)}));
+  });
+  return {g,last,partner,opp};
+}
+const get=(m,a,b)=>(m[a]&&m[a][b])||0;
+function minEff(){const h=history();const a=active();return a.length?Math.min(...a.map(p=>(h.g[p.id]||0)+(p.offset||0))):0}
+
+function nextMatch(){
+  const act=active(); if(act.length<4) return null;
+  const h=history(), ec=effCourts(), n=S.matches.length;
+  const hard=new Set(), soft=new Set();
+  S.matches.slice(Math.max(0,n-(ec-1))).forEach(m=>ids(m).forEach(id=>hard.add(id)));
+  S.matches.slice(Math.max(0,n-ec)).forEach(m=>ids(m).forEach(id=>soft.add(id)));
+  let cand=act.filter(p=>!hard.has(p.id));
+  if(cand.length<4) cand=act;
+  const info=cand.map(p=>({id:p.id,eff:(h.g[p.id]||0)+(p.offset||0),last:h.last[p.id]??-1,r:Math.random()}))
+    .sort((x,y)=>x.eff-y.eff||x.last-y.last||x.r-y.r).slice(0,9);
+  const mn=info[0].eff;
+  const splits=[[[0,1],[2,3]],[[0,2],[1,3]],[[0,3],[1,2]]];
+  let best=null,bestC=Infinity;
+  for(let a=0;a<info.length;a++)for(let b=a+1;b<info.length;b++)for(let c=b+1;c<info.length;c++)for(let d=c+1;d<info.length;d++){
+    const q=[info[a],info[b],info[c],info[d]];
+    let base=0;
+    q.forEach(x=>{base+=40*(x.eff-mn); if(soft.has(x.id))base+=15; base-=2*Math.min(n-1-x.last,8)});
+    const ls=q.map(x=>lvOf(x.id)); base+=3*(Math.max(...ls)-Math.min(...ls));
+    for(const [A,B] of splits){
+      const ta=A.map(i=>q[i].id), tb=B.map(i=>q[i].id);
+      const diff=(lvOf(ta[0])+lvOf(ta[1]))-(lvOf(tb[0])+lvOf(tb[1]));
+      let cst=base+12*diff*diff+10*get(h.partner,ta[0],ta[1])**1.5*2+10*get(h.partner,tb[0],tb[1])**1.5*2;
+      ta.forEach(x=>tb.forEach(y=>cst+=3*get(h.opp,x,y)));
+      cst+=Math.random()*0.5;
+      if(cst<bestC){bestC=cst;best={a:ta,b:tb}}
+    }
+  }
+  return {id:uid(),a:best.a,b:best.b,done:false};
+}
+function topUp(){
+  // trim extra waiting from the end
+  let st=statuses();
+  while(waitingCount()>S.ahead){ for(let i=S.matches.length-1;i>=0;i--){if(!isLocked(st[i])){S.matches.splice(i,1);break}} st=statuses(); }
+  let guard=0;
+  while(waitingCount()<S.ahead && guard++<100){const m=nextMatch(); if(!m)break; S.matches.push(m);}
+}
+function rosterChange(fn){trimToLocked();fn();topUp();render()}
+
+/* ---------- render ---------- */
+const lvChip=l=>`<i class="lv l${l}">${l}</i>`;
+const segHTML=(val,attr)=>[1,2,3].map(l=>`<button type="button" class="l${l}" data-l="${l}" ${attr||''} aria-pressed="${val===l}" aria-label="ระดับ ${l}">${l}</button>`).join('');
+function sideHTML(t,cls){const sum=t.reduce((s,id)=>s+lvOf(id),0);return `<div class="side ${cls}">${t.map(id=>`<div class="pl">${lvChip(lvOf(id))}<span class="n">${esc(nameOf(id))}</span></div>`).join('')}<div class="sum">รวม ${sum}</div></div>`}
+const LABEL={done:'จบแล้ว',playing:'กำลังเล่น',next:'ถัดไป',wait:'รอคิว'};
+
+function renderSetup(){
+  $('courtOut').textContent=S.courts; $('aheadOut').textContent=S.ahead;
+  const a=active().length, all=S.players.filter(p=>!p.deleted).length;
+  $('countNote').textContent=`มา ${a} จาก ${all} คน`;
+  $('newLevel').innerHTML=segHTML(newLevel);
+  $('playerList').innerHTML=S.players.filter(p=>!p.deleted).map(p=>`
+    <li class="${p.active?'':'off'}" data-id="${p.id}">
+      <input type="checkbox" class="chk" data-act ${p.active?'checked':''} aria-label="${esc(p.name)} มาเล่น" id="a-${p.id}">
+      <input type="text" class="pname" data-name value="${esc(p.name)}" aria-label="ชื่อ" id="n-${p.id}">
+      <div class="seg">${segHTML(p.level,'data-setl')}</div>
+      <button class="ghost danger" data-del aria-label="ลบ ${esc(p.name)}">✕</button>
+    </li>`).join('')||'<li class="muted">ยังไม่มีผู้เล่น</li>';
+}
+function renderQueue(){
+  const st=statuses(), wrap=$('queueWrap');
+  if(!S.matches.length){wrap.innerHTML='<div class="empty">เพิ่มผู้เล่นที่มาอย่างน้อย 4 คน แล้วคิวแมตช์จะขึ้นที่นี่</div>'}
+  else{
+    let html='<ol class="queue">', doneCount=st.filter(s=>s==='done').length, shownDiv=false;
+    S.matches.forEach((m,i)=>{
+      const s=st[i];
+      if(!shownDiv && s!=='done' && doneCount){html+=`<li class="divider">จบไปแล้ว ${doneCount} แมตช์</li>`;shownDiv=true}
+      html+=`<li class="m ${s}" data-mid="${m.id}">
+        <div class="no">${i+1}<small>แมตช์</small></div>
+        <div class="court">${sideHTML(m.a,'a')}<span class="vs">VS</span>${sideHTML(m.b,'b')}</div>
+        <div class="act"><span class="chip ${s}">${LABEL[s]}</span>${
+          s==='playing'?'<button class="primary" data-done>จบแล้ว</button>':
+          s==='done'?'<button class="ghost" data-undo>ยังไม่จบ</button>':
+          '<button class="ghost" data-done>จบแล้ว</button>'}</div>
+      </li>`;
+    });
+    wrap.innerHTML=html+'</ol>';
+    const doneEls=wrap.querySelectorAll('.m.done');
+    // keep done matches but fold older ones if many
+    if(doneEls.length>3){doneEls.forEach((el,j)=>{if(j<doneEls.length-3)el.hidden=true});
+      const d=wrap.querySelector('.divider'); if(d){d.innerHTML=`จบไปแล้ว ${doneCount} แมตช์ <button class="ghost" id="showDone" style="font-size:12px;padding:0 6px">แสดงทั้งหมด</button>`}}
+    const sd=$('showDone'); if(sd) sd.onclick=()=>{doneEls.forEach(el=>el.hidden=false);sd.remove()};
+    // put divider before first done if all shown order: move divider to top of done list
+    const div=wrap.querySelector('.divider'); const firstDone=wrap.querySelector('.m.done');
+    if(div&&firstDone) firstDone.parentNode.insertBefore(div,firstDone);
+  }
+  const a=active();
+  const playingIds=new Set(); S.matches.forEach((m,i)=>{if(st[i]==='playing')ids(m).forEach(id=>playingIds.add(id))});
+  const resting=a.filter(p=>!playingIds.has(p.id));
+  const rn=$('restNow');
+  if(S.matches.length&&resting.length){rn.hidden=false;rn.innerHTML=`ตอนนี้พักอยู่: <b>${resting.map(p=>esc(p.name)).join(', ')}</b>`}else rn.hidden=true;
+  const w=$('warn');
+  if(a.length<4){w.hidden=false;w.textContent='ต้องมีผู้เล่นที่มาอย่างน้อย 4 คนถึงจะจัดแมตช์ได้'}
+  else if(a.length<S.courts*4){w.hidden=false;w.textContent=`มี ${a.length} คน ไม่พอลง ${S.courts} สนามพร้อมกัน จะจัดคิวแบบลงพร้อมกัน ${effCourts()} สนาม`}
+  else w.hidden=true;
+  $('rerollBtn').disabled=a.length<4; $('copyBtn').disabled=!S.matches.some(m=>!m.done);
+}
+function renderStats(){
+  const st=statuses(), h={done:{},q:{},next:{}};
+  S.matches.forEach((m,i)=>ids(m).forEach(id=>{
+    if(st[i]==='done')h.done[id]=(h.done[id]||0)+1;
+    else{h.q[id]=(h.q[id]||0)+1; if(h.next[id]==null)h.next[id]=i+1;}
+  }));
+  const hist=history();
+  const list=S.players.filter(p=>!p.deleted&&(p.active||hist.g[p.id]));
+  const maxG=Math.max(1,...list.map(p=>h.done[p.id]||0));
+  const rows=list.map(p=>({p,d:h.done[p.id]||0,q:h.q[p.id]||0,nx:h.next[p.id],partners:Object.keys(hist.partner[p.id]||{}).length,
+    reps:Object.values(hist.partner[p.id]||{}).reduce((s,v)=>s+Math.max(0,v-1),0)}))
+    .sort((a,b)=>(a.nx??1e9)-(b.nx??1e9)||a.p.name.localeCompare(b.p.name,'th'));
+  $('stats').innerHTML=`<thead><tr><th>ชื่อ</th><th>ระดับ</th><th class="num">เล่นจบแล้ว</th><th class="num">อยู่ในคิว</th><th class="num">ลงครั้งถัดไป</th><th class="num">คู่ที่เคยจับ</th><th class="num">จับคู่ซ้ำ</th></tr></thead><tbody>${
+    rows.map(r=>`<tr><td>${esc(r.p.name)}${r.p.active?'':' <span class="muted">(ไม่อยู่)</span>'}</td><td>${lvChip(r.p.level)}</td><td class="num">${r.d}<span class="bar" style="width:${Math.round(r.d/maxG*40)}px"></span></td><td class="num">${r.q||'–'}</td><td class="num">${r.nx?'แมตช์ '+r.nx:'–'}</td><td class="num">${r.partners}</td><td class="num">${r.reps||'–'}</td></tr>`).join('')||'<tr><td colspan="7" class="muted">ยังไม่มีข้อมูล</td></tr>'
+  }</tbody>`;
+  const ag=active().map(p=>(hist.g[p.id]||0)+(p.offset||0));
+  $('fairNote').textContent=S.matches.length&&ag.length?`รวมคิวทั้งหมด ${S.matches.length} แมตช์ · จำนวนเกมของแต่ละคนห่างกันไม่เกิน ${Math.max(...ag)-Math.min(...ag)} เกม`:'';
+}
+function resetIdle(){$('resetWrap').innerHTML='<button class="danger ghost" id="resetBtn">เริ่มวันใหม่</button>';$('resetBtn').onclick=askReset}
+function askReset(){
+  $('resetWrap').innerHTML='<span class="confirm">ลบคิวทั้งหมด (เก็บรายชื่อไว้)? <button class="danger" id="rsYes">ลบ</button><button id="rsNo">ยกเลิก</button></span>';
+  $('rsYes').onclick=()=>{S.matches=[];S.sample=false;S.players=S.players.filter(p=>!p.deleted);S.players.forEach(p=>p.offset=0);topUp();resetIdle();render();toast('เริ่มวันใหม่แล้ว')};
+  $('rsNo').onclick=resetIdle;
+}
+function render(){renderSetup();renderQueue();renderStats();save()}
+function toast(t){const e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,1800)}
+
+/* ---------- actions ---------- */
+function addPlayer(name,level){name=name.trim();if(!name)return;S.players.push({id:uid(),name,level,active:true,offset:S.matches.length?minEff():0,deleted:false})}
+function activate(p){if(!p.active&&S.matches.length){const h=history();const m=minEff();const cur=(h.g[p.id]||0)+(p.offset||0);if(cur<m)p.offset=(p.offset||0)+(m-cur)}p.active=true}
+
+$('courtMinus').onclick=()=>rosterChange(()=>{S.courts=Math.max(1,S.courts-1)});
+$('courtPlus').onclick=()=>rosterChange(()=>{S.courts=Math.min(20,S.courts+1)});
+$('aheadMinus').onclick=()=>{S.ahead=Math.max(1,S.ahead-1);topUp();render()};
+$('aheadPlus').onclick=()=>{S.ahead=Math.min(30,S.ahead+1);topUp();render()};
+$('allOn').onclick=()=>rosterChange(()=>{trimToLocked();S.players.forEach(p=>{if(!p.deleted)activate(p)})});
+$('allOff').onclick=()=>rosterChange(()=>S.players.forEach(p=>p.active=false));
+$('newLevel').addEventListener('click',e=>{const b=e.target.closest('[data-l]');if(!b)return;newLevel=+b.dataset.l;renderSetup()});
+$('addForm').addEventListener('submit',e=>{e.preventDefault();const v=$('newName').value;rosterChange(()=>addPlayer(v,newLevel));$('newName').value='';$('newName').focus()});
+$('bulkAdd').onclick=()=>{
+  const lines=$('bulkText').value.split(/\n|,/).map(s=>s.trim()).filter(Boolean);let n=0;
+  rosterChange(()=>lines.forEach(line=>{const m=line.match(/^(.*?)[\s\-:]*([123])$/);let name=line,l=2;if(m&&m[1].trim()){name=m[1].trim();l=+m[2]}
+    name=name.replace(/^\d+[.)]\s*/,'');if(name){addPlayer(name,l);n++}}));
+  $('bulkText').value='';toast(`เพิ่ม ${n} คนแล้ว`);
+};
+$('playerList').addEventListener('click',e=>{
+  const li=e.target.closest('li[data-id]');if(!li)return;const p=P(li.dataset.id);
+  const lb=e.target.closest('[data-setl]');
+  if(lb){rosterChange(()=>{p.level=+lb.dataset.l});return}
+  if(e.target.closest('[data-del]')){rosterChange(()=>{if(S.matches.some(m=>ids(m).includes(p.id))){p.deleted=true;p.active=false}else S.players=S.players.filter(x=>x!==p)})}
+});
+$('playerList').addEventListener('change',e=>{
+  const li=e.target.closest('li[data-id]');if(!li)return;const p=P(li.dataset.id);
+  if(e.target.matches('[data-act]')){const on=e.target.checked;rosterChange(()=>{if(on)activate(p);else p.active=false})}
+  if(e.target.matches('[data-name]')){const v=e.target.value.trim();if(v)p.name=v;render()}
+});
+$('queueWrap').addEventListener('click',e=>{
+  const li=e.target.closest('[data-mid]');if(!li)return;const m=S.matches.find(x=>x.id===li.dataset.mid);if(!m)return;
+  if(e.target.closest('[data-done]')){S.sample=false;m.done=true;topUp();render()}
+  else if(e.target.closest('[data-undo]')){m.done=false;topUp();render()}
+});
+$('rerollBtn').onclick=()=>{rosterChange(()=>{});toast('จัดคิวที่รออยู่ใหม่แล้ว')};
+$('copyBtn').onclick=async()=>{
+  const st=statuses();
+  const txt='คิวตีแบด\n'+S.matches.map((m,i)=>st[i]==='done'?null:`แมตช์ ${i+1}: ${m.a.map(nameOf).join(' + ')}  vs  ${m.b.map(nameOf).join(' + ')}${st[i]==='playing'?'  (กำลังเล่น)':''}`).filter(Boolean).join('\n');
+  try{await navigator.clipboard.writeText(txt);toast('คัดลอกแล้ว วางใน LINE ได้เลย')}
+  catch(err){$('copyWrap').hidden=false;$('copyText').value=txt;$('copyText').select();toast('เลือกข้อความแล้ว กดคัดลอกเองได้')}
+};
+
+/* ---------- init ---------- */
+S=load();
+if(!S||!Array.isArray(S.players)||!Array.isArray(S.matches)){
+  const old=loadOldPlayers();
+  S={courts:2,ahead:6,matches:[],sample:!old,
+     players:old||SAMPLE.map(([n,l])=>({id:uid(),name:n,level:l,active:true,offset:0,deleted:false}))};
+  topUp();
+  if(S.sample){S.matches[0].done=true;S.matches[1].done=true;topUp()}
+}
+resetIdle();
+render();
+})();
+</script>
+</body>
+</html>
