@@ -103,8 +103,8 @@ details[open] summary{margin-bottom:8px}
 .court{position:relative;border-radius:7px;overflow:hidden;background:linear-gradient(90deg,var(--court) 0 50%,var(--court-2) 50% 100%);color:var(--on-court);display:grid;grid-template-columns:1fr 1fr;border:2px solid var(--court-line)}
 .court::before{content:"";position:absolute;left:50%;top:0;bottom:0;border-left:2px dashed var(--court-line);transform:translateX(-1px)}
 .court .vs{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--court-line);color:var(--court);font-family:var(--display);font-weight:700;font-size:10px;padding:0 5px;border-radius:4px;z-index:2}
-.side{position:relative;z-index:1;display:flex;flex-direction:column;gap:3px;padding:8px 20px 8px 10px;min-width:0}
-.side.b{align-items:flex-end;text-align:right;padding:8px 10px 8px 20px}
+.side{position:relative;z-index:1;display:flex;flex-direction:column;justify-content:center;gap:3px;padding:10px 22px 10px 12px;min-width:0}
+.side.b{align-items:flex-end;text-align:right;padding:10px 12px 10px 22px}
 .pl{display:flex;align-items:center;gap:6px;font-weight:600;font-size:15px;max-width:100%}
 .side.b .pl{flex-direction:row-reverse}
 .pl .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -121,6 +121,9 @@ details[open] summary{margin-bottom:8px}
 .m.done .court .vs{background:var(--line);color:var(--done-ink)}
 .m.done .no{color:var(--muted)}
 .m.playing .no{color:var(--accent)}
+.even{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--accent);font-weight:600;margin:2px 0 2px 66px}
+.even::after{content:"";flex:1;border-top:1px dashed var(--accent);opacity:.5}
+@media (max-width:520px){.even{margin-left:50px}}
 .divider{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);letter-spacing:.04em;margin:6px 0 2px}
 .divider::after{content:"";flex:1;border-top:1px solid var(--line)}
 @media (max-width:520px){
@@ -292,7 +295,7 @@ function rosterChange(fn){trimToLocked();fn();topUp();render()}
 /* ---------- render ---------- */
 const lvChip=l=>`<i class="lv l${l}">${l}</i>`;
 const segHTML=(val,attr)=>[1,2,3].map(l=>`<button type="button" class="l${l}" data-l="${l}" ${attr||''} aria-pressed="${val===l}" aria-label="ระดับ ${l}">${l}</button>`).join('');
-function sideHTML(t,cls){const sum=t.reduce((s,id)=>s+lvOf(id),0);return `<div class="side ${cls}">${t.map(id=>`<div class="pl">${lvChip(lvOf(id))}<span class="n">${esc(nameOf(id))}</span></div>`).join('')}<div class="sum">รวม ${sum}</div></div>`}
+function sideHTML(t,cls){return `<div class="side ${cls}">${t.map(id=>`<div class="pl"><span class="n">${esc(nameOf(id))}</span></div>`).join('')}</div>`}
 const LABEL={done:'จบแล้ว',playing:'กำลังเล่น',next:'ถัดไป',wait:'รอคิว'};
 
 function renderSetup(){
@@ -313,6 +316,7 @@ function renderQueue(){
   if(!S.matches.length){wrap.innerHTML='<div class="empty">เพิ่มผู้เล่นที่มาอย่างน้อย 4 คน แล้วคิวแมตช์จะขึ้นที่นี่</div>'}
   else{
     let html='<ol class="queue">', doneCount=st.filter(s=>s==='done').length, shownDiv=false;
+    const act=active(), cnt={}; act.forEach(p=>cnt[p.id]=p.offset||0);
     S.matches.forEach((m,i)=>{
       const s=st[i];
       if(!shownDiv && s!=='done' && doneCount){html+=`<li class="divider">จบไปแล้ว ${doneCount} แมตช์</li>`;shownDiv=true}
@@ -324,6 +328,12 @@ function renderQueue(){
           s==='done'?'<button class="ghost" data-undo>ยังไม่จบ</button>':
           '<button class="ghost" data-done>จบแล้ว</button>'}</div>
       </li>`;
+      ids(m).forEach(id=>{if(id in cnt)cnt[id]++});
+      const vals=Object.values(cnt);
+      if(s!=='done'&&vals.length>=4&&i<S.matches.length-1&&vals.every(v=>v===vals[0])){
+        const raw=act.every(p=>!(p.offset));
+        html+=`<li class="even">จบแมตช์ ${i+1} ทุกคนได้ลงเท่ากัน${raw?` คนละ ${vals[0]} เกม`:''}</li>`;
+      }
     });
     wrap.innerHTML=html+'</ol>';
     const doneEls=wrap.querySelectorAll('.m.done');
