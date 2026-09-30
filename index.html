@@ -11,7 +11,7 @@
 <style>
 :root{
   --bg:#F2F5F1; --surface:#FFFFFF; --sunk:#E8EEE9; --ink:#15221C; --muted:#5A6A62; --line:#D6DFD8;
-  --court:#1D6A50; --court-2:#237C5E; --court-line:rgba(255,255,255,.85); --on-court:#FFFFFF;
+  --court:#1D6A50; --court-2:#237C5E; --live:#1C5C9E; --live-2:#2470BD; --live-ink:#1C5C9E; --nx:#A8620F; --nx-2:#BD7318; --court-line:rgba(255,255,255,.85); --on-court:#FFFFFF;
   --done:#DCE3DE; --done-ink:#5A6A62;
   --accent:#1D6A50; --accent-ink:#FFFFFF; --next:#B7801A; --next-bg:#FBF0DA;
   --l1:#C2433A; --l1-bg:#FBE4E1; --l2:#B7801A; --l2-bg:#FBF0DA; --l3:#3F7CC4; --l3-bg:#E4EEF9;
@@ -23,7 +23,7 @@
   :root:not([data-theme="light"]){
     color-scheme:dark;
     --bg:#0E1613; --surface:#16211C; --sunk:#1C2A24; --ink:#E5EEE9; --muted:#95A79D; --line:#2A3A33;
-    --court:#1B5A45; --court-2:#206A51; --court-line:rgba(255,255,255,.7);
+    --court:#1B5A45; --court-2:#206A51; --live:#1D4F85; --live-2:#235E9C; --live-ink:#7FB4F0; --nx:#8A5210; --nx-2:#9C5F17; --court-line:rgba(255,255,255,.7);
     --done:#1C2A24; --done-ink:#95A79D;
     --accent:#45B08A; --accent-ink:#08130F; --next:#E2B04E; --next-bg:#342A16;
     --l1:#EE7D73; --l1-bg:#3A1F1C; --l2:#E2B04E; --l2-bg:#342A16; --l3:#7FB0EA; --l3-bg:#1C2B3D;
@@ -33,7 +33,7 @@
 :root[data-theme="dark"]{
   color-scheme:dark;
   --bg:#0E1613; --surface:#16211C; --sunk:#1C2A24; --ink:#E5EEE9; --muted:#95A79D; --line:#2A3A33;
-  --court:#1B5A45; --court-2:#206A51; --court-line:rgba(255,255,255,.7);
+  --court:#1B5A45; --court-2:#206A51; --live:#1D4F85; --live-2:#235E9C; --live-ink:#7FB4F0; --nx:#8A5210; --nx-2:#9C5F17; --court-line:rgba(255,255,255,.7);
   --done:#1C2A24; --done-ink:#95A79D;
   --accent:#45B08A; --accent-ink:#08130F; --next:#E2B04E; --next-bg:#342A16;
   --l1:#EE7D73; --l1-bg:#3A1F1C; --l2:#E2B04E; --l2-bg:#342A16; --l3:#7FB0EA; --l3-bg:#1C2B3D;
@@ -120,7 +120,14 @@ details[open] summary{margin-bottom:8px}
 .m.done .court::before{border-left-color:var(--line)}
 .m.done .court .vs{background:var(--line);color:var(--done-ink)}
 .m.done .no{color:var(--muted)}
-.m.playing .no{color:var(--accent)}
+.m.playing .no{color:var(--live-ink)}
+.m.playing .court{background:linear-gradient(90deg,var(--live) 0 50%,var(--live-2) 50% 100%)}
+.m.playing .court .vs{color:var(--live)}
+.m.next .court{background:linear-gradient(90deg,var(--nx) 0 50%,var(--nx-2) 50% 100%)}
+.m.next .court .vs{color:var(--nx)}
+.m.next .no{color:var(--next)}
+.chip.playing{background:var(--live);color:#fff}
+.m.playing .act button.primary{background:var(--live);border-color:var(--live);color:#fff}
 .even{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--accent);font-weight:600;margin:2px 0 2px 66px}
 .even::after{content:"";flex:1;border-top:1px dashed var(--accent);opacity:.5}
 @media (max-width:520px){.even{margin-left:50px}}
@@ -199,7 +206,7 @@ body[data-tab=players] .queue-panel,body[data-tab=players] .stats-panel{display:
   .m .no{font-size:20px}
   .m .no .lbl{display:none}
   .m .no .st{display:block;font-size:11px;font-weight:600;margin-top:4px;white-space:nowrap;letter-spacing:-.01em}
-  .m.playing .no .st{color:var(--accent)}
+  .m.playing .no .st{color:var(--live-ink)}
   .m.next .no .st{color:var(--next)}
   .m .act{display:none}
   .m.playing .act,.m.done .act{display:flex;grid-column:2;margin-top:-2px}
