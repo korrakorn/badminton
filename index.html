@@ -464,8 +464,10 @@ function nextMatch(){
   const act=active(); if(act.length<4) return null;
   const h=history(), ec=effCourts(), n=S.matches.length;
   const hard=new Set(), soft=new Set();
-  S.matches.slice(Math.max(0,n-(ec-1))).forEach(m=>ids(m).forEach(id=>hard.add(id)));
-  S.matches.slice(Math.max(0,n-ec)).forEach(m=>ids(m).forEach(id=>soft.add(id)));
+  // matches that will still be on court when this one starts = the last (courts-1) unfinished ones
+  const nd=S.matches.filter(m=>!m.done);
+  nd.slice(Math.max(0,nd.length-(ec-1))).forEach(m=>ids(m).forEach(id=>hard.add(id)));
+  nd.slice(Math.max(0,nd.length-ec)).forEach(m=>ids(m).forEach(id=>soft.add(id)));
   let cand=act.filter(p=>!hard.has(p.id));
   if(cand.length<4) cand=act;
   const info=cand.map(p=>({id:p.id,eff:(h.g[p.id]||0)+(p.offset||0),last:h.last[p.id]??-1,r:Math.random()}))
@@ -489,7 +491,24 @@ function nextMatch(){
   }
   return {id:uid(),a:best.a,b:best.b,done:false};
 }
-function topUp(){
+function topUp(){fill();settle()}
+/* A court can finish before the other one. If the match that now moves onto a court
+   shares a player with a match still being played, rebuild the waiting queue from
+   who is actually free. Matches already on court (started) are never changed. */
+function settle(){
+  for(let pass=0;pass<3;pass++){
+    const st=statuses(), busy=new Set(); let clash=false;
+    S.matches.forEach((m,i)=>{
+      if(st[i]!=='playing')return;
+      if(!m.started&&ids(m).some(id=>busy.has(id)))clash=true;
+      ids(m).forEach(id=>busy.add(id));
+    });
+    if(!clash)break;
+    S.matches=S.matches.filter(m=>m.done||m.started); fill();
+  }
+  const st=statuses(); S.matches.forEach((m,i)=>{if(st[i]==='playing')m.started=true});
+}
+function fill(){
   // trim extra waiting from the end
   let st=statuses();
   while(waitingCount()>S.ahead){ for(let i=S.matches.length-1;i>=0;i--){if(!isLocked(st[i])){S.matches.splice(i,1);break}} st=statuses(); }
