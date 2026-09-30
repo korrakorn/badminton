@@ -194,7 +194,7 @@ details[open] summary{margin-bottom:8px}
 .paidchip{font-size:12px;font-weight:600;border-radius:999px;padding:1px 10px;background:var(--sunk);color:var(--muted)}
 .paidchip.yes{background:var(--accent);color:var(--accent-ink)}
 tr.paid td:first-child{color:var(--muted)}
-.qrcard{border-radius:12px;overflow:hidden;background:#fff;border:1px solid var(--line)}
+.qrcard{border-radius:12px;overflow:hidden;background:#fff;border:1px solid var(--line);max-width:320px;width:100%;margin:0 auto}
 .qrcard img{display:block;width:100%;height:auto}
 .m .no .st{display:none}
 body[data-tab=queue] .setup-panel{display:none}
@@ -241,6 +241,13 @@ body[data-tab=players] .queue-panel,body[data-tab=players] .stats-panel{display:
   .side.b{padding:10px 10px 10px 20px}
   .viewonly .m{grid-template-columns:56px minmax(0,1fr)}
 }
+.billswitch{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;background:var(--sunk)}
+.switch{position:relative;width:52px;height:30px;border-radius:999px;padding:0;border:0;background:var(--line);flex:none;transition:background .15s}
+.switch span{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:left .15s}
+.switch[aria-checked=true]{background:var(--accent)}
+.switch[aria-checked=true] span{left:25px}
+.switch:hover{background:var(--line)}
+.switch[aria-checked=true]:hover{background:var(--accent)}
 .warnline{color:var(--danger)}
 .divider{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);letter-spacing:.04em;margin:6px 0 2px}
 .divider::after{content:"";flex:1;border-top:1px solid var(--line)}
@@ -349,6 +356,10 @@ img{max-width:100%}
   <div id="tabBill" hidden>
     <div class="bill-grid">
       <section class="panel" aria-label="ค่าใช้จ่าย">
+        <div class="editor-only billswitch" id="billSwitchRow">
+          <div><div class="label">หน้าคิดเงินในลิงก์เพื่อน</div><div class="note" id="billSwitchNote"></div></div>
+          <button type="button" class="switch" id="billSwitch" role="switch" aria-checked="false" aria-label="แสดงหน้าคิดเงินให้เพื่อน"><span></span></button>
+        </div>
         <h2>ค่าใช้จ่าย</h2>
         <div class="fgroup">
           <div class="label">ค่าสนาม</div>
@@ -435,7 +446,7 @@ function migrateLevels(d){
   return d;
 }
 function billDefaults(b){
-  return {courts:S&&S.courts||2,hours:2,rate:150,shuttles:6,price:85,extra:0,mode:'equal',round:5,paid:{},...(b||{}),paid:(b&&b.paid)||{}};
+  return {visible:false,courts:S&&S.courts||2,hours:2,rate:150,shuttles:6,price:85,extra:0,mode:'equal',round:5,paid:{},...(b||{}),paid:(b&&b.paid)||{}};
 }
 function norm(d){
   const arr=x=>Array.isArray(x)?x.filter(Boolean):Object.values(x||{});
@@ -658,6 +669,9 @@ function billCalc(){
 const BF={bCourts:'courts',bHours:'hours',bRate:'rate',bShuttles:'shuttles',bPrice:'price'};
 function renderBill(){
   const b=S.bill, c=billCalc();
+  $('billSwitch').setAttribute('aria-checked',!!b.visible);
+  $('billSwitchNote').textContent=b.visible?'เปิดอยู่ · เพื่อนเห็นยอดและ QR':'ปิดอยู่ · เพื่อนยังไม่เห็นแท็บนี้';
+  if(VIEW){ $('tabBtnBill').hidden=!b.visible; if(!b.visible&&curTab==='bill') showTab('queue'); }
   Object.entries(BF).forEach(([id,k])=>{const el=$(id);el.disabled=VIEW;if(document.activeElement!==el)el.value=b[k]??''});
   $('bMode').querySelectorAll('button').forEach(x=>{x.setAttribute('aria-pressed',x.dataset.mode===b.mode);x.disabled=VIEW});
   $('bCourtSum').textContent=baht(c.courtSum)+' บาท'; $('bShuttleSum').textContent=baht(c.shuttleSum)+' บาท';
@@ -718,6 +732,7 @@ $('copyBtn').onclick=async()=>{
 };
 
 Object.entries(BF).forEach(([id,k])=>$(id).addEventListener('input',e=>{if(VIEW)return;const v=parseFloat(e.target.value);S.bill[k]=isNaN(v)?0:Math.max(0,v);render()}));
+$('billSwitch').addEventListener('click',()=>{if(VIEW)return;S.bill.visible=!S.bill.visible;render();toast(S.bill.visible?'เปิดหน้าคิดเงินให้เพื่อนแล้ว':'ปิดหน้าคิดเงินจากเพื่อนแล้ว')});
 $('bMode').addEventListener('click',e=>{const x=e.target.closest('[data-mode]');if(!x||VIEW)return;S.bill.mode=x.dataset.mode;render()});
 $('billTable').addEventListener('click',e=>{const x=e.target.closest('[data-paid]');if(!x||VIEW)return;const id=x.closest('tr').dataset.id;
   if(S.bill.paid[id])delete S.bill.paid[id];else S.bill.paid[id]=true;render()});
@@ -790,7 +805,7 @@ async function copyLink(url,label){
   try{await navigator.clipboard.writeText(url);toast(`คัดลอก${label}แล้ว`)}
   catch(e){$('linkWrap').hidden=false;$('linkText').value=url;$('linkText').select()}
 }
-$('copyView').onclick=()=>copyLink(`คิวแบดห้อง${roomName(ROOM)}\n${links().view}`,'ลิงก์ให้เพื่อนดู');
+$('copyView').onclick=()=>copyLink(links().view,'ลิงก์ให้เพื่อนดู');
 $('copyEdit').onclick=()=>copyLink(links().edit,'ลิงก์ผู้จัด');
 
 function syncRoomUI(){
