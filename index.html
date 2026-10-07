@@ -248,6 +248,8 @@ body[data-tab=players] .queue-panel,body[data-tab=players] .stats-panel{display:
 .switch[aria-checked=true] span{left:25px}
 .switch:hover{background:var(--line)}
 .switch[aria-checked=true]:hover{background:var(--accent)}
+.roster{font-size:13px;color:var(--muted);line-height:1.6;margin-top:-6px}
+.roster b{color:var(--ink);font-weight:600}
 .warnline{color:var(--danger)}
 .divider{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);letter-spacing:.04em;margin:6px 0 2px}
 .divider::after{content:"";flex:1;border-top:1px solid var(--line)}
@@ -340,6 +342,7 @@ img{max-width:100%}
         <span id="resetWrap" class="editor-only"></span>
       </div>
       <div id="warn" class="note" hidden></div>
+      <div id="roster" class="roster" hidden></div>
       <div id="restNow" class="resting" hidden></div>
       <div id="copyWrap" hidden><textarea class="copybox" id="copyText" readonly aria-label="ข้อความคิว"></textarea></div>
       <div id="queueWrap"></div>
@@ -474,14 +477,15 @@ function trimToLocked(){const st=statuses();S.matches=S.matches.filter((m,i)=>is
 function waitingCount(){return statuses().filter(s=>s==='next'||s==='wait').length}
 
 function history(){
-  const g={},last={},partner={},opp={};
+  const g={},last={},partner={},opp={},tog={};
   const inc=(m,a,b)=>{(m[a]=m[a]||{})[b]=(m[a][b]||0)+1};
   S.matches.forEach((m,i)=>{
     ids(m).forEach(id=>{g[id]=(g[id]||0)+1;last[id]=i});
     inc(partner,m.a[0],m.a[1]);inc(partner,m.a[1],m.a[0]);inc(partner,m.b[0],m.b[1]);inc(partner,m.b[1],m.b[0]);
     m.a.forEach(x=>m.b.forEach(y=>{inc(opp,x,y);inc(opp,y,x)}));
+    const q=ids(m); for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){inc(tog,q[i],q[j]);inc(tog,q[j],q[i])}
   });
-  return {g,last,partner,opp};
+  return {g,last,partner,opp,tog};
 }
 const get=(m,a,b)=>(m[a]&&m[a][b])||0;
 function minEff(){const h=history();const a=active();return a.length?Math.min(...a.map(p=>(h.g[p.id]||0)+(p.offset||0))):0}
@@ -506,6 +510,8 @@ function nextMatch(){
     let base=0;
     q.forEach(x=>{base+=40*(x.eff-mn); if(soft.has(x.id))base+=15; base-=2*Math.min(n-1-x.last,8)});
     const ls=q.map(x=>lvOf(x.id)); base+=3*(Math.max(...ls)-Math.min(...ls));
+    // mix groups: penalise the same people ending up on court together again
+    for(let i=0;i<4;i++)for(let j=i+1;j<4;j++)base+=10*get(h.tog,q[i].id,q[j].id);
     for(const [A,B] of splits){
       const ta=A.map(i=>q[i].id), tb=B.map(i=>q[i].id);
       const diff=(lvOf(ta[0])+lvOf(ta[1]))-(lvOf(tb[0])+lvOf(tb[1]));
@@ -605,6 +611,8 @@ function renderQueue(){
   const a=active();
   const playingIds=new Set(); S.matches.forEach((m,i)=>{if(st[i]==='playing')ids(m).forEach(id=>playingIds.add(id))});
   const resting=a.filter(p=>!playingIds.has(p.id));
+  const ro=$('roster');
+  if(a.length){ro.hidden=false;ro.innerHTML=`<b>มาวันนี้ ${a.length} คน:</b> ${a.map(p=>esc(p.name)).join(', ')}`}else ro.hidden=true;
   const rn=$('restNow');
   if(S.matches.length&&resting.length){rn.hidden=false;rn.innerHTML=`ตอนนี้พักอยู่: <b>${resting.map(p=>esc(p.name)).join(', ')}</b>`}else rn.hidden=true;
   const w=$('warn');
