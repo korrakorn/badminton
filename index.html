@@ -250,6 +250,12 @@ body[data-tab=players] .queue-panel,body[data-tab=players] .stats-panel{display:
 .switch[aria-checked=true]:hover{background:var(--accent)}
 .roster{font-size:13px;color:var(--muted);line-height:1.6;margin-top:-6px}
 .roster b{color:var(--ink);font-weight:600}
+.nbtn{all:unset;cursor:pointer;font:inherit;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-bottom:1px dashed rgba(255,255,255,.45)}
+.nbtn:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.m.done .nbtn{border-bottom:0;cursor:default}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:0 12px calc(12px + env(safe-area-inset-bottom,0px))}
+.sheet-in{max-width:520px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+#absentText{font-family:var(--display);font-weight:700;font-size:18px}
 .warnline{color:var(--danger)}
 .divider{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);letter-spacing:.04em;margin:6px 0 2px}
 .divider::after{content:"";flex:1;border-top:1px solid var(--line)}
@@ -406,6 +412,13 @@ img{max-width:100%}
     </div>
   </div>
 </div>
+<div class="sheet" id="absentSheet" hidden>
+  <div class="sheet-in">
+    <div id="absentText"></div>
+    <div class="note">ระบบจะเอาออกจากคิวที่ยังไม่ได้เล่น แล้วจัดคิวใหม่จากคนที่อยู่ พอมาถึงแล้วไปติ๊กชื่อในแท็บผู้เล่น</div>
+    <div class="row" style="justify-content:flex-end"><button id="absentNo">ยกเลิก</button><button class="primary" id="absentYes">ยังไม่มา เอาออกก่อน</button></div>
+  </div>
+</div>
 <div class="toast" id="toast" hidden></div>
 
 <script type="module">
@@ -553,7 +566,7 @@ function rosterChange(fn){trimToLocked();fn();topUp();render()}
 const lvChip=l=>`<i class="lv l${l}">${l}</i>`;
 const LVNAME={1:'เลิศ',2:'ชิล',3:'หอบ'};
 const segHTML=(val,attr)=>[1,2,3].map(l=>`<button type="button" class="l${l}" data-l="${l}" ${attr||''} aria-pressed="${val===l}" aria-label="ระดับ ${l} ${LVNAME[l]}" title="${LVNAME[l]}">${l}</button>`).join('');
-function sideHTML(t,cls){return `<div class="side ${cls}">${t.map(id=>`<div class="pl">${VIEW?'':`<i class="lv l${lvOf(id)} qlv">${lvOf(id)}</i>`}<span class="n">${esc(nameOf(id))}</span></div>`).join('')}</div>`}
+function sideHTML(t,cls){return `<div class="side ${cls}">${t.map(id=>`<div class="pl">${VIEW?'':`<i class="lv l${lvOf(id)} qlv">${lvOf(id)}</i>`}${VIEW?`<span class="n">${esc(nameOf(id))}</span>`:`<button type="button" class="n nbtn" data-pid="${id}" title="แตะถ้าคนนี้ยังไม่มา">${esc(nameOf(id))}</button>`}</div>`).join('')}</div>`}
 const LABEL={done:'จบแล้ว',playing:'กำลังเล่น',next:'ถัดไป',wait:'รอคิว'};
 
 function renderSetup(){
@@ -730,7 +743,20 @@ $('queueWrap').addEventListener('click',e=>{
   const li=e.target.closest('[data-mid]');if(!li)return;const m=S.matches.find(x=>x.id===li.dataset.mid);if(!m)return;
   if(e.target.closest('[data-done]')){S.sample=false;m.done=true;topUp();render()}
   else if(e.target.closest('[data-undo]')){m.done=false;topUp();render()}
+  else{const nb=e.target.closest('.nbtn'); if(nb&&!m.done&&!VIEW) askAbsent(nb.dataset.pid,m.id);}
 });
+let absentPid=null,absentMid=null;
+function askAbsent(pid,mid){absentPid=pid;absentMid=mid;$('absentText').textContent=`${nameOf(pid)} ยังไม่มาใช่ไหม?`;$('absentSheet').hidden=false;$('absentYes').focus()}
+$('absentNo').onclick=()=>{$('absentSheet').hidden=true};
+$('absentYes').onclick=()=>{
+  const p=P(absentPid); $('absentSheet').hidden=true; if(!p)return;
+  rosterChange(()=>{
+    p.active=false;
+    // a match already on court that needs this person can't go ahead – put it back to be rebuilt
+    S.matches=S.matches.filter(m=>m.done||!ids(m).includes(p.id));
+  });
+  toast(`เอา ${p.name} ออกจากคิวแล้ว`);
+};
 $('rerollBtn').onclick=()=>{rosterChange(()=>{});toast('จัดคิวที่รออยู่ใหม่แล้ว')};
 $('copyBtn').onclick=async()=>{
   const st=statuses();
