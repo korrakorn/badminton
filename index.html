@@ -259,8 +259,12 @@ body[data-tab=players] .queue-panel,body[data-tab=players] .stats-panel{display:
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:0 12px calc(12px + env(safe-area-inset-bottom,0px))}
 .sheet-in{max-width:520px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
 #absentText{font-family:var(--display);font-weight:700;font-size:18px}
-.mebox{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 10px;align-items:center;padding:12px;border-radius:12px;background:var(--sunk)}
-.mebox select{font:inherit;font-size:16px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+.qtools .refresh{margin-left:16px;flex:none}
+.viewonly .qtools h2{display:none}
+.mepick{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.mepick .label{flex:none}
+.mecard{padding:12px 14px;border-radius:12px;background:var(--sunk)}
+.mepick select{flex:1;font:inherit;font-size:16px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
 .mestatus{grid-column:1/-1;font-family:var(--display);font-weight:700;font-size:18px;line-height:1.35}
 .mestatus:empty{display:none}
 .mestatus small{display:block;font-family:var(--body);font-weight:400;font-size:13px;color:var(--muted)}
@@ -353,19 +357,19 @@ img{max-width:100%}
     </section>
 
     <section class="panel queue-panel" aria-label="คิวแมตช์">
-      <div class="toolbar">
+      <div class="toolbar qtools">
         <h2>คิวแมตช์</h2>
-        <span class="spacer"></span>
+        <div id="meBox" class="mepick" hidden>
+          <label for="meSel" class="label">ฉันคือ</label>
+          <select id="meSel"></select>
+        </div>
         <button id="rerollBtn" class="editor-only">สุ่มคิวที่รออยู่ใหม่</button>
-        <button id="refreshBtn" title="โหลดหน้าใหม่"><span aria-hidden="true">↻</span> รีเฟรช</button>
         <span id="resetWrap" class="editor-only"></span>
+        <span class="spacer"></span>
+        <button id="refreshBtn" class="refresh" title="โหลดหน้าใหม่"><span aria-hidden="true">↻</span> รีเฟรช</button>
       </div>
       <div id="warn" class="note" hidden></div>
-      <div id="meBox" class="mebox" hidden>
-        <label for="meSel" class="label">ฉันคือ</label>
-        <select id="meSel"></select>
-        <div id="meStatus" class="mestatus"></div>
-      </div>
+      <div id="meStatus" class="mestatus mecard" hidden></div>
       <div id="roster" class="roster" hidden></div>
       <div id="restNow" class="resting" hidden></div>
       <div id="queueWrap"></div>
@@ -656,16 +660,16 @@ function renderQueue(){
 }
 function meKey(){return 'badminton-me-'+(ROOM||'local')}
 function renderMe(st){
-  const box=$('meBox'); if(!VIEW){box.hidden=true;return}
+  const box=$('meBox'); if(!VIEW){box.hidden=true;$('meStatus').hidden=true;return}
   const ppl=S.players.filter(p=>!p.deleted&&p.active);
-  if(!ppl.length){box.hidden=true;return}
+  if(!ppl.length){box.hidden=true;$('meStatus').hidden=true;return}
   box.hidden=false;
   const sel=$('meSel');
   const opts='<option value="">เลือกชื่อเพื่อดูคิวของตัวเอง</option>'+ppl.map(p=>`<option value="${p.id}"${p.id===ME?' selected':''}>${esc(p.name)}</option>`).join('');
   if(sel.dataset.sig!==opts){sel.innerHTML=opts;sel.dataset.sig=opts}
   sel.value=ME&&ppl.some(p=>p.id===ME)?ME:'';
-  const out=$('meStatus'); out.className='mestatus';
-  if(!ME||!ppl.some(p=>p.id===ME)){out.innerHTML='';return}
+  const out=$('meStatus'); out.className='mestatus mecard'; out.hidden=false;
+  if(!ME||!ppl.some(p=>p.id===ME)){out.innerHTML='';out.hidden=true;return}
   let ahead=0, found=null;
   for(let i=0;i<S.matches.length;i++){
     const s2=st[i]; if(s2==='done')continue;
