@@ -367,7 +367,7 @@ img{max-width:100%}
       <div class="toolbar qtools">
         <h2>คิวแมตช์</h2>
         <div id="meBox" class="mepick" hidden>
-          <label for="meSel" class="label">ฉันคือ</label>
+          <label for="meSel" class="label">ดูคิว</label>
           <select id="meSel"></select>
         </div>
         <button id="rerollBtn" class="editor-only">สุ่มคิวที่รออยู่ใหม่</button>
@@ -655,9 +655,9 @@ function renderQueue(){
   const resting=a.filter(p=>!playingIds.has(p.id));
   renderMe(st);
   const ro=$('roster');
-  if(a.length){ro.hidden=false;ro.innerHTML=`<b>มาวันนี้ ${a.length} คน:</b> ${a.map(p=>esc(p.name)).join(', ')}`}else ro.hidden=true;
+  if(a.length){ro.hidden=false;ro.innerHTML=`<b>นักกีฬา ${a.length} คน:</b> ${a.map(p=>esc(p.name)).join(', ')}`}else ro.hidden=true;
   const rn=$('restNow');
-  if(S.matches.length&&resting.length){rn.hidden=false;rn.innerHTML=`ตอนนี้พักอยู่: <b>${resting.map(p=>esc(p.name)).join(', ')}</b>`}else rn.hidden=true;
+  if(S.matches.length&&resting.length){rn.hidden=false;rn.innerHTML=`พักผ่อนได้: <b>${resting.map(p=>esc(p.name)).join(', ')}</b>`}else rn.hidden=true;
   const w=$('warn');
   if(VIEW){w.hidden=true}
   else if(a.length<4){w.hidden=false;w.textContent='ต้องมีผู้เล่นที่มาอย่างน้อย 4 คนถึงจะจัดแมตช์ได้'}
@@ -672,7 +672,7 @@ function renderMe(st){
   if(!ppl.length){box.hidden=true;$('meStatus').hidden=true;return}
   box.hidden=false;
   const sel=$('meSel');
-  const opts='<option value="">เลือกชื่อเพื่อดูคิวของตัวเอง</option>'+ppl.map(p=>`<option value="${p.id}"${p.id===ME?' selected':''}>${esc(p.name)}</option>`).join('');
+  const opts='<option value="">เลือกชื่อ</option>'+ppl.map(p=>`<option value="${p.id}"${p.id===ME?' selected':''}>${esc(p.name)}</option>`).join('');
   if(sel.dataset.sig!==opts){sel.innerHTML=opts;sel.dataset.sig=opts}
   sel.value=ME&&ppl.some(p=>p.id===ME)?ME:'';
   const out=$('meStatus'); out.className='mestatus mecard'; out.hidden=false;
