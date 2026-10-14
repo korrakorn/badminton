@@ -14,7 +14,7 @@
 <style>
 :root{
   --bg:#F2F5F1; --surface:#FFFFFF; --sunk:#E8EEE9; --ink:#15221C; --muted:#5A6A62; --line:#D6DFD8;
-  --court:#1D6A50; --court-2:#237C5E; --live:#1C5C9E; --live-2:#2470BD; --live-ink:#1C5C9E; --nx:#A8620F; --nx-2:#BD7318; --court-line:rgba(255,255,255,.85); --on-court:#FFFFFF;
+  --court:#1D6A50; --court-2:#237C5E; --live:#DCEBFB; --live-2:#CCE2F8; --live-ink:#1C5C9E; --live-line:#7FAEE3; --live-text:#0F2E52; --nx:#A8620F; --nx-2:#BD7318; --court-line:rgba(255,255,255,.85); --on-court:#FFFFFF;
   --done:#DCE3DE; --done-ink:#5A6A62;
   --accent:#1D6A50; --accent-ink:#FFFFFF; --next:#B7801A; --next-bg:#FBF0DA;
   --l1:#C2433A; --l1-bg:#FBE4E1; --l2:#B7801A; --l2-bg:#FBF0DA; --l3:#3F7CC4; --l3-bg:#E4EEF9;
@@ -26,7 +26,7 @@
   :root:not([data-theme="light"]){
     color-scheme:dark;
     --bg:#0E1613; --surface:#16211C; --sunk:#1C2A24; --ink:#E5EEE9; --muted:#95A79D; --line:#2A3A33;
-    --court:#1B5A45; --court-2:#206A51; --live:#1D4F85; --live-2:#235E9C; --live-ink:#7FB4F0; --nx:#8A5210; --nx-2:#9C5F17; --court-line:rgba(255,255,255,.7);
+    --court:#1B5A45; --court-2:#206A51; --live:#24384F; --live-2:#2A425D; --live-ink:#8CBDF2; --live-line:#5C88BC; --live-text:#E3EFFC; --nx:#8A5210; --nx-2:#9C5F17; --court-line:rgba(255,255,255,.7);
     --done:#1C2A24; --done-ink:#95A79D;
     --accent:#45B08A; --accent-ink:#08130F; --next:#E2B04E; --next-bg:#342A16;
     --l1:#EE7D73; --l1-bg:#3A1F1C; --l2:#E2B04E; --l2-bg:#342A16; --l3:#7FB0EA; --l3-bg:#1C2B3D;
@@ -36,7 +36,7 @@
 :root[data-theme="dark"]{
   color-scheme:dark;
   --bg:#0E1613; --surface:#16211C; --sunk:#1C2A24; --ink:#E5EEE9; --muted:#95A79D; --line:#2A3A33;
-  --court:#1B5A45; --court-2:#206A51; --live:#1D4F85; --live-2:#235E9C; --live-ink:#7FB4F0; --nx:#8A5210; --nx-2:#9C5F17; --court-line:rgba(255,255,255,.7);
+  --court:#1B5A45; --court-2:#206A51; --live:#24384F; --live-2:#2A425D; --live-ink:#8CBDF2; --live-line:#5C88BC; --live-text:#E3EFFC; --nx:#8A5210; --nx-2:#9C5F17; --court-line:rgba(255,255,255,.7);
   --done:#1C2A24; --done-ink:#95A79D;
   --accent:#45B08A; --accent-ink:#08130F; --next:#E2B04E; --next-bg:#342A16;
   --l1:#EE7D73; --l1-bg:#3A1F1C; --l2:#E2B04E; --l2-bg:#342A16; --l3:#7FB0EA; --l3-bg:#1C2B3D;
@@ -127,7 +127,10 @@ details[open] summary{margin-bottom:8px}
 .m.done .no{color:var(--muted)}
 .m.playing .no{color:var(--live-ink)}
 .m.playing .court{background:linear-gradient(90deg,var(--live) 0 50%,var(--live-2) 50% 100%)}
-.m.playing .court .vs{color:var(--live)}
+.m.playing .court{color:var(--live-text);border-color:var(--live-line)}
+.m.playing .court::before{border-left-color:var(--live-line)}
+.m.playing .court .vs{background:var(--live-ink);color:#fff}
+.m.playing .nbtn{border-bottom-color:var(--live-line)}
 .m.next .court{background:linear-gradient(90deg,#0A9A4E 0 50%,#0DB25B 50% 100%);border-color:#6BFFA8;box-shadow:0 0 0 1px #39F58A,0 0 14px rgba(57,245,138,.55)}
 .m.next .court::before{border-left-color:#B8FFD4}
 .m.next .court .vs{background:#E9FFF1;color:#08813F}
@@ -137,7 +140,7 @@ details[open] summary{margin-bottom:8px}
 
 
 .m.next .no{color:#0A9A4E}
-.chip.playing{background:var(--live);color:#fff}
+.chip.playing{background:var(--live-ink);color:var(--surface)}
 .m.playing .act button.primary{background:#E3141B;border-color:#E3141B;color:#fff;font-weight:700;box-shadow:0 2px 6px rgba(227,20,27,.35)}
 .m.playing .act button.primary:hover{background:#C80F15;filter:none}
 @media (prefers-reduced-motion:no-preference){
@@ -256,6 +259,16 @@ body[data-tab=players] .queue-panel,body[data-tab=players] .stats-panel{display:
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:0 12px calc(12px + env(safe-area-inset-bottom,0px))}
 .sheet-in{max-width:520px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
 #absentText{font-family:var(--display);font-weight:700;font-size:18px}
+.mebox{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 10px;align-items:center;padding:12px;border-radius:12px;background:var(--sunk)}
+.mebox select{font:inherit;font-size:16px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+.mestatus{grid-column:1/-1;font-family:var(--display);font-weight:700;font-size:18px;line-height:1.35}
+.mestatus:empty{display:none}
+.mestatus small{display:block;font-family:var(--body);font-weight:400;font-size:13px;color:var(--muted)}
+.mestatus.go{color:#08813F}.mestatus.now{color:var(--live-ink)}
+.pl.me .n{background:#FFE14D;color:#1A1400;border-radius:5px;padding:0 5px;text-shadow:none}
+.viewonly .m.wait .side{padding-top:6px;padding-bottom:6px}
+.viewonly .m.wait .pl{font-size:14px}
+.viewonly .m.wait .no{font-size:18px}
 .warnline{color:var(--danger)}
 .divider{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);letter-spacing:.04em;margin:6px 0 2px}
 .divider::after{content:"";flex:1;border-top:1px solid var(--line)}
@@ -344,13 +357,17 @@ img{max-width:100%}
         <h2>คิวแมตช์</h2>
         <span class="spacer"></span>
         <button id="rerollBtn" class="editor-only">สุ่มคิวที่รออยู่ใหม่</button>
-        <button id="copyBtn">คัดลอกคิว</button>
+        <button id="refreshBtn" title="โหลดหน้าใหม่"><span aria-hidden="true">↻</span> รีเฟรช</button>
         <span id="resetWrap" class="editor-only"></span>
       </div>
       <div id="warn" class="note" hidden></div>
+      <div id="meBox" class="mebox" hidden>
+        <label for="meSel" class="label">ฉันคือ</label>
+        <select id="meSel"></select>
+        <div id="meStatus" class="mestatus"></div>
+      </div>
       <div id="roster" class="roster" hidden></div>
       <div id="restNow" class="resting" hidden></div>
-      <div id="copyWrap" hidden><textarea class="copybox" id="copyText" readonly aria-label="ข้อความคิว"></textarea></div>
       <div id="queueWrap"></div>
       <p class="note editor-only" style="margin:0">สนามไหนเล่นจบ กด “จบแล้ว” ที่แมตช์นั้น แล้วเรียกแมตช์ “ถัดไป” ลงสนามที่ว่างได้เลย</p>
     </section>
@@ -566,7 +583,8 @@ function rosterChange(fn){trimToLocked();fn();topUp();render()}
 const lvChip=l=>`<i class="lv l${l}">${l}</i>`;
 const LVNAME={1:'เลิศ',2:'ชิล',3:'หอบ'};
 const segHTML=(val,attr)=>[1,2,3].map(l=>`<button type="button" class="l${l}" data-l="${l}" ${attr||''} aria-pressed="${val===l}" aria-label="ระดับ ${l} ${LVNAME[l]}" title="${LVNAME[l]}">${l}</button>`).join('');
-function sideHTML(t,cls){return `<div class="side ${cls}">${t.map(id=>`<div class="pl">${VIEW?'':`<i class="lv l${lvOf(id)} qlv">${lvOf(id)}</i>`}${VIEW?`<span class="n">${esc(nameOf(id))}</span>`:`<button type="button" class="n nbtn" data-pid="${id}" title="แตะถ้าคนนี้ยังไม่มา">${esc(nameOf(id))}</button>`}</div>`).join('')}</div>`}
+function sideHTML(t,cls){return `<div class="side ${cls}">${t.map(id=>`<div class="pl${id===ME?' me':''}">${VIEW?'':`<i class="lv l${lvOf(id)} qlv">${lvOf(id)}</i>`}${VIEW?`<span class="n">${esc(nameOf(id))}</span>`:`<button type="button" class="n nbtn" data-pid="${id}" title="แตะถ้าคนนี้ยังไม่มา">${esc(nameOf(id))}</button>`}</div>`).join('')}</div>`}
+let ME=null;
 const LABEL={done:'จบแล้ว',playing:'กำลังเล่น',next:'ถัดไป',wait:'รอคิว'};
 
 function renderSetup(){
@@ -613,7 +631,7 @@ function renderQueue(){
     wrap.innerHTML=html+'</ol>';
     const doneEls=wrap.querySelectorAll('.m.done');
     // keep done matches but fold older ones if many
-    const keep=matchMedia('(max-width:520px)').matches?1:3;
+    const keep=VIEW?0:(matchMedia('(max-width:520px)').matches?1:3);
     if(doneEls.length>keep){doneEls.forEach((el,j)=>{if(j<doneEls.length-keep)el.hidden=true});
       const d=wrap.querySelector('.divider'); if(d){d.innerHTML=`จบไปแล้ว ${doneCount} แมตช์ <button class="ghost" id="showDone" style="font-size:12px;padding:0 6px">แสดงทั้งหมด</button>`}}
     const sd=$('showDone'); if(sd) sd.onclick=()=>{doneEls.forEach(el=>el.hidden=false);sd.remove()};
@@ -624,6 +642,7 @@ function renderQueue(){
   const a=active();
   const playingIds=new Set(); S.matches.forEach((m,i)=>{if(st[i]==='playing')ids(m).forEach(id=>playingIds.add(id))});
   const resting=a.filter(p=>!playingIds.has(p.id));
+  renderMe(st);
   const ro=$('roster');
   if(a.length){ro.hidden=false;ro.innerHTML=`<b>มาวันนี้ ${a.length} คน:</b> ${a.map(p=>esc(p.name)).join(', ')}`}else ro.hidden=true;
   const rn=$('restNow');
@@ -633,7 +652,31 @@ function renderQueue(){
   else if(a.length<4){w.hidden=false;w.textContent='ต้องมีผู้เล่นที่มาอย่างน้อย 4 คนถึงจะจัดแมตช์ได้'}
   else if(a.length<S.courts*4){w.hidden=false;w.textContent=`มี ${a.length} คน ไม่พอลง ${S.courts} สนามพร้อมกัน จะจัดคิวแบบลงพร้อมกัน ${effCourts()} สนาม`}
   else w.hidden=true;
-  $('rerollBtn').disabled=a.length<4; $('copyBtn').disabled=!S.matches.some(m=>!m.done);
+  $('rerollBtn').disabled=a.length<4;
+}
+function meKey(){return 'badminton-me-'+(ROOM||'local')}
+function renderMe(st){
+  const box=$('meBox'); if(!VIEW){box.hidden=true;return}
+  const ppl=S.players.filter(p=>!p.deleted&&p.active);
+  if(!ppl.length){box.hidden=true;return}
+  box.hidden=false;
+  const sel=$('meSel');
+  const opts='<option value="">เลือกชื่อเพื่อดูคิวของตัวเอง</option>'+ppl.map(p=>`<option value="${p.id}"${p.id===ME?' selected':''}>${esc(p.name)}</option>`).join('');
+  if(sel.dataset.sig!==opts){sel.innerHTML=opts;sel.dataset.sig=opts}
+  sel.value=ME&&ppl.some(p=>p.id===ME)?ME:'';
+  const out=$('meStatus'); out.className='mestatus';
+  if(!ME||!ppl.some(p=>p.id===ME)){out.innerHTML='';return}
+  let ahead=0, found=null;
+  for(let i=0;i<S.matches.length;i++){
+    const s2=st[i]; if(s2==='done')continue;
+    if(ids(S.matches[i]).includes(ME)){found={i,s:s2};break}
+    if(s2!=='playing')ahead++;
+  }
+  if(!found){out.innerHTML='ตอนนี้พัก<small>ยังไม่มีชื่อในคิวที่จัดไว้</small>';return}
+  const no=found.i+1;
+  if(found.s==='playing'){out.classList.add('now');out.innerHTML=`กำลังเล่นอยู่ · แมตช์ ${no}`}
+  else if(found.s==='next'){out.classList.add('go');out.innerHTML=`แมตช์ถัดไปคือคุณ! เตรียมตัว<small>แมตช์ ${no} · ลงสนามแรกที่ว่าง</small>`}
+  else out.innerHTML=`ลงแมตช์ ${no} · รออีก ${ahead} แมตช์<small>ชื่อของคุณถูกไฮไลต์สีเหลืองในคิว</small>`;
 }
 function renderStats(){
   const st=statuses(), played={}, partner={}, now={}, next={};
@@ -657,8 +700,8 @@ function renderStats(){
     else {key=1e9;label=p.active?'พัก':'กลับแล้ว';cls='done'}
     return {p,g:played[p.id]||0,key,label,cls,partners:Object.keys(pr).length,reps:Object.values(pr).reduce((s,v)=>s+Math.max(0,v-1),0)};
   }).sort((a,b)=>a.key-b.key||a.p.name.localeCompare(b.p.name,'th'));
-  $('stats').innerHTML=`<thead><tr><th>ชื่อ</th><th class="editor-only">ลำดับมือ</th><th>ตอนนี้</th><th class="num">ได้เล่น</th><th class="num">คู่ที่เคยจับ</th><th class="num">จับคู่ซ้ำ</th></tr></thead><tbody>${
-    rows.map(r=>`<tr><td>${esc(r.p.name)}</td><td class="editor-only">${lvChip(r.p.level)}</td><td><span class="chip ${r.cls}">${r.label}</span></td><td class="num">${r.g}<span class="bar" style="width:${Math.round(r.g/maxG*40)}px"></span></td><td class="num">${r.partners}</td><td class="num">${r.reps||'–'}</td></tr>`).join('')||'<tr><td colspan="6" class="muted">ยังไม่มีข้อมูล</td></tr>'
+  $('stats').innerHTML=`<thead><tr><th>ชื่อ</th><th class="editor-only">ลำดับมือ</th><th>ตอนนี้</th><th class="num">ได้เล่น</th><th class="num editor-only">คู่ที่เคยจับ</th><th class="num editor-only">จับคู่ซ้ำ</th></tr></thead><tbody>${
+    rows.map(r=>`<tr><td>${esc(r.p.name)}</td><td class="editor-only">${lvChip(r.p.level)}</td><td><span class="chip ${r.cls}">${r.label}</span></td><td class="num">${r.g}<span class="bar" style="width:${Math.round(r.g/maxG*40)}px"></span></td><td class="num editor-only">${r.partners}</td><td class="num editor-only">${r.reps||'–'}</td></tr>`).join('')||'<tr><td colspan="6" class="muted">ยังไม่มีข้อมูล</td></tr>'
   }</tbody>`;
   const ag=active().map(p=>(played[p.id]||0)+(p.offset||0));
   $('fairNote').textContent=ag.length&&S.matches.length?`นับรวมแมตช์ที่กำลังเล่น · จำนวนเกมห่างกันไม่เกิน ${Math.max(...ag)-Math.min(...ag)} เกม`:'';
@@ -758,12 +801,7 @@ $('absentYes').onclick=()=>{
   toast(`เอา ${p.name} ออกจากคิวแล้ว`);
 };
 $('rerollBtn').onclick=()=>{rosterChange(()=>{});toast('จัดคิวที่รออยู่ใหม่แล้ว')};
-$('copyBtn').onclick=async()=>{
-  const st=statuses();
-  const txt='คิวตีแบด\n'+S.matches.map((m,i)=>st[i]==='done'?null:`แมตช์ ${i+1}: ${m.a.map(nameOf).join(' + ')}  vs  ${m.b.map(nameOf).join(' + ')}${st[i]==='playing'?'  (กำลังเล่น)':''}`).filter(Boolean).join('\n');
-  try{await navigator.clipboard.writeText(txt);toast('คัดลอกแล้ว วางใน LINE ได้เลย')}
-  catch(err){$('copyWrap').hidden=false;$('copyText').value=txt;$('copyText').select();toast('เลือกข้อความแล้ว กดคัดลอกเองได้')}
-};
+$('refreshBtn').onclick=()=>location.reload();
 
 Object.entries(BF).forEach(([id,k])=>$(id).addEventListener('input',e=>{if(VIEW)return;const v=parseFloat(e.target.value);S.bill[k]=isNaN(v)?0:Math.max(0,v);render()}));
 $('billSwitch').addEventListener('click',()=>{if(VIEW)return;S.bill.visible=!S.bill.visible;render();toast(S.bill.visible?'เปิดหน้าคิดเงินให้เพื่อนแล้ว':'ปิดหน้าคิดเงินจากเพื่อนแล้ว')});
@@ -830,6 +868,8 @@ function roomName(id){
   let h=0; for(const c of String(id||''))h=(h*31+c.charCodeAt(0))>>>0;
   return FUN_A[h%FUN_A.length]+FUN_B[Math.floor(h/FUN_A.length)%FUN_B.length];
 }
+$('meSel').addEventListener('change',e=>{ME=e.target.value||null;try{ME?localStorage.setItem(meKey(),ME):localStorage.removeItem(meKey())}catch(err){}render(false);
+  const el=document.querySelector('.pl.me');if(el)el.scrollIntoView({block:'center',behavior:'smooth'})});
 function setLive(state,text){$('liveDot').className='dot '+(state||'');$('liveText').textContent=text}
 function links(){
   const base=location.origin+location.pathname;
@@ -850,6 +890,7 @@ $('roomNameInput').addEventListener('change',e=>{const v=e.target.value.trim().s
 $('roomNameRandom').onclick=()=>{S.roomName=FUN_A[Math.floor(Math.random()*FUN_A.length)]+FUN_B[Math.floor(Math.random()*FUN_B.length)];render();syncRoomUI();refreshLive()};
 function refreshLive(){ if(FB) setLive('on',VIEW?`ห้อง${roomName(ROOM)} · อัปเดตสด`:`ห้อง${roomName(ROOM)} · ออนไลน์ เพื่อนเห็นคิวสด`) }
 async function startSync(){
+  if(VIEW){try{ME=localStorage.getItem(meKey())||null}catch(e){}}
   if(!FIREBASE_CONFIG.databaseURL||!FIREBASE_CONFIG.apiKey){
     if(VIEW){$('shareBar').hidden=false;setLive('off','ยังไม่ได้ตั้งค่า Firebase ในไฟล์นี้ จึงดูคิวออนไลน์ไม่ได้')}
     return;
