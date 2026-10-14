@@ -276,6 +276,10 @@ body[data-tab=players] .queue-panel,body[data-tab=players] .stats-panel{display:
 .viewonly .m.wait .side{padding-top:6px;padding-bottom:6px}
 .viewonly .m.wait .pl{font-size:14px}
 .viewonly .m.wait .no{font-size:18px}
+.livepill{display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:2px 10px 2px 8px;border-radius:999px;background:#E3141B;color:#fff;font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.08em;vertical-align:middle;line-height:1.6}
+.livepill i{width:8px;height:8px;border-radius:50%;background:#fff}
+@media (prefers-reduced-motion:no-preference){.livepill i{animation:livePulse 1.4s ease-in-out infinite}}
+@keyframes livePulse{0%,100%{opacity:1}50%{opacity:.25}}
 .warnline{color:var(--danger)}
 .divider{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);letter-spacing:.04em;margin:6px 0 2px}
 .divider::after{content:"";flex:1;border-top:1px solid var(--line)}
@@ -300,7 +304,7 @@ img{max-width:100%}
 <body>
 <div class="wrap">
   <header>
-    <h1><span class="brand"><svg class="racket" viewBox="0 0 48 48" aria-hidden="true"><g transform="rotate(-40 24 24)" fill="none" stroke="currentColor"><ellipse cx="24" cy="14" rx="9" ry="12" stroke-width="3"/><path d="M18 7v14M21.5 3.5v21M26.5 3.5v21M30 7v14M16 10h16M15.4 14h17.2M16 18h16M18 22h12" stroke-width="1.1" opacity=".75"/><path d="M24 26v6" stroke-width="3"/><rect x="21.6" y="32" width="4.8" height="13" rx="2.2" fill="currentColor" stroke="none"/></g></svg>จัดคู่ตีแบด</span><small>แบดมินตันประเภทคู่ · จัดคิวแมตช์เรียงลำดับ สนามไหนว่างก็เรียกแมตช์ถัดไปลง</small></h1>
+    <h1><span class="brand"><svg class="racket" viewBox="0 0 48 48" aria-hidden="true"><g transform="rotate(-40 24 24)" fill="none" stroke="currentColor"><ellipse cx="24" cy="14" rx="9" ry="12" stroke-width="3"/><path d="M18 7v14M21.5 3.5v21M26.5 3.5v21M30 7v14M16 10h16M15.4 14h17.2M16 18h16M18 22h12" stroke-width="1.1" opacity=".75"/><path d="M24 26v6" stroke-width="3"/><rect x="21.6" y="32" width="4.8" height="13" rx="2.2" fill="currentColor" stroke="none"/></g></svg>จัดคู่ตีแบด<span id="livePill" class="livepill" hidden><i></i>LIVE</span></span><small>แบดมินตันประเภทคู่ · จัดคิวแมตช์เรียงลำดับ สนามไหนว่างก็เรียกแมตช์ถัดไปลง</small></h1>
     <div class="legend editor-only">
       <span><i class="lv l1">1</i>เลิศ</span>
       <span><i class="lv l2">2</i>ชิล</span>
@@ -742,7 +746,7 @@ function renderBill(){
   const b=S.bill, c=billCalc();
   $('billSwitch').setAttribute('aria-checked',!!b.visible);
   $('billSwitchNote').textContent=b.visible?'เปิดอยู่ · เพื่อนเห็นยอดและ QR':'ปิดอยู่ · เพื่อนยังไม่เห็นแท็บนี้';
-  if(VIEW){ $('tabBtnBill').hidden=!b.visible; if(!b.visible&&curTab==='bill') showTab('queue'); }
+  if(VIEW){ $('tabBtnBill').hidden=!b.visible; document.querySelector('.tabs').hidden=!b.visible; if(!b.visible&&curTab==='bill') showTab('queue'); }
   Object.entries(BF).forEach(([id,k])=>{const el=$(id);el.disabled=VIEW;if(document.activeElement!==el)el.value=b[k]??''});
   $('bMode').querySelectorAll('button').forEach(x=>{x.setAttribute('aria-pressed',x.dataset.mode===b.mode);x.disabled=VIEW});
   $('bCourtSum').textContent=baht(c.courtSum)+' บาท'; $('bShuttleSum').textContent=baht(c.shuttleSum)+' บาท';
@@ -877,7 +881,10 @@ function roomName(id){
 }
 $('meSel').addEventListener('change',e=>{ME=e.target.value||null;try{ME?localStorage.setItem(meKey(),ME):localStorage.removeItem(meKey())}catch(err){}render(false);
   const el=document.querySelector('.pl.me');if(el)el.scrollIntoView({block:'center',behavior:'smooth'})});
-function setLive(state,text){$('liveDot').className='dot '+(state||'');$('liveText').textContent=text}
+function setLive(state,text){
+  $('liveDot').className='dot '+(state||'');$('liveText').textContent=text;
+  if(VIEW){ const on=state==='on'; $('livePill').hidden=!on; $('shareBar').hidden=on; }
+}
 function links(){
   const base=location.origin+location.pathname;
   return {view:`${base}?room=${ROOM}&view`,edit:`${base}?room=${ROOM}`};
