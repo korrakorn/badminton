@@ -741,7 +741,7 @@ function billCalc(){
   const people=S.players.filter(p=>!p.deleted&&(p.active||g[p.id]));
   const courtSum=(+b.courts||0)*(+b.hours||0)*(+b.rate||0), shuttleSum=(+b.shuttles||0)*(+b.price||0);
   const total=courtSum+shuttleSum;
-  const up=x=>x>0?Math.round(x*100)/100:0;
+  const up=x=>x>0?Math.ceil(x-1e-9):0;
   const sumG=people.reduce((s,p)=>s+(g[p.id]||0),0);
   const rows=people.map(p=>{
     const games=g[p.id]||0;
@@ -758,21 +758,16 @@ function billCalc(){
   const bal={};
   rows.forEach(r=>{r.front=r2(fronted[r.p.id]||0);r.net=r2(r.amt-r.front);bal[r.p.id]=r.net});
   Object.keys(fronted).forEach(k=>{if(!(k in bal)){bal[k]=r2(-fronted[k])}});
-  // greedy settle: debtors pay creditors
-  const cred=Object.entries(bal).filter(([k,v])=>v<-0.004).map(([k,v])=>({k,left:-v}));
-  const xfer={}, recv={};
-  rows.filter(r=>r.net>0.004).forEach(r=>{
-    let need=r.net; xfer[r.p.id]=[];
-    for(const c of cred){ if(need<=0.004)break; if(c.left<=0.004)continue;
-      const amt=r2(Math.min(need,c.left)); c.left=r2(c.left-amt); need=r2(need-amt);
-      xfer[r.p.id].push({to:c.k,amt}); (recv[c.k]=recv[c.k]||[]).push({from:r.p.id,amt}); }
-  });
-  rows.forEach(r=>{r.xfer=xfer[r.p.id]||[];r.recv=recv[r.p.id]||[]});
-  const owed=rows.filter(r=>r.net>0.004);
-  // people who fronted money but did not play
-  const extraCreditors=Object.keys(fronted).filter(k=>!rows.some(r=>r.p.id===k)).map(k=>({k,front:fronted[k],recv:recv[k]||[]}));
+  // hub = whoever fronted the most; everybody settles only with the hub
+  let hub=null; Object.entries(fronted).forEach(([k,v])=>{if(hub==null||v>fronted[hub])hub=k});
+  rows.forEach(r=>{r.isHub=r.p.id===hub;});
+  const extraCreditors=Object.keys(fronted).filter(k=>!rows.some(r=>r.p.id===k)).map(k=>({k,front:fronted[k],net:r2(-fronted[k]),isHub:k===hub}));
+  const all=[...rows.map(r=>({k:r.p.id,net:r.net,isHub:r.isHub})),...extraCreditors];
+  const toHub=all.filter(x=>!x.isHub&&x.net>0.004), fromHub=all.filter(x=>!x.isHub&&x.net<-0.004);
+  const hubIn=r2(toHub.reduce((s,x)=>s+x.net,0)), hubOut=r2(fromHub.reduce((s,x)=>s-x.net,0));
+  const owed=toHub;
   return {courtSum,shuttleSum,total,rows,per:b.mode==='equal'&&people.length?up(total/people.length):null,
-    owedTotal:r2(owed.reduce((s,r)=>s+r.net,0)),paidSum:r2(owed.filter(r=>r.paid).reduce((s,r)=>s+r.net,0)),perGame:sumG?total/sumG:0,extraCreditors,ORG};
+    owedTotal:hubIn,paidSum:r2(owed.filter(x=>b.paid[x.k]).reduce((s,x)=>s+x.net,0)),perGame:sumG?total/sumG:0,extraCreditors,ORG,hub,hubIn,hubOut,fromHub};
 }
 const BF={bCourts:'courts',bHours:'hours',bRate:'rate',bShuttles:'shuttles',bPrice:'price'};
 function renderBill(){
@@ -792,21 +787,27 @@ function renderBill(){
   [['bCourtPayer','courtPayer'],['bShuttlePayer','shuttlePayer']].forEach(([id,k])=>{const el=$(id);el.disabled=VIEW;if(document.activeElement!==el){el.innerHTML=opts(k);el.value=b[k]||''}});
   $('billNote').textContent=c.rows.length?'':'ยังไม่มีคนมาเล่น';
   const who=k=>k===c.ORG?'ผู้จัด (QR)':esc(nameOf(k));
-  const oweCell=r=>{
-    if(r.net>0.004) return `<div class="owe">โอน <b>${baht(r.net)}</b><br>ให้ ${r.xfer.map(x=>r.xfer.length>1?`${who(x.to)} ${baht(x.amt)}`:who(x.to)).join(', ')}</div>`;
-    if(r.net<-0.004) return `<div class="owe get">ได้คืน <b>${baht(-r.net)}</b><br><span class="muted">ออกไปก่อน ${baht(r.front)}</span></div>`;
-    return `<div class="owe muted">ไม่ต้องโอน</div>`;
+  const hubName=c.hub?who(c.hub):'ผู้จัด (QR)';
+  const toggle=(id,on,yes,no)=>VIEW?`<span class="paidchip ${on?'yes':''}">${on?yes:no}</span>`:`<button class="${on?'primary':''}" data-paid style="padding:3px 10px;font-size:13px">${on?yes:no}</button>`;
+  const rowFor=(id,name,net,isHub,extra)=>{
+    const done=!!b.paid[id];
+    let what,status;
+    if(isHub){
+      what=`<div class="owe get">รับเงินรวม <b>${baht(c.hubIn)}</b>${c.hubOut>0.004?`<br><span class="muted">คืนให้ ${c.fromHub.map(x=>`${who(x.k)} ${baht(-x.net)}`).join(', ')}</span>`:''}</div>`;
+      status='<span class="recvchip">ผู้รับเงิน</span>';
+    } else if(net>0.004){
+      what=`<div class="owe">โอน <b>${baht(net)}</b><br>ให้ ${hubName}</div>`; status=toggle(id,done,'จ่ายแล้ว','ยังไม่จ่าย');
+    } else if(net<-0.004){
+      what=`<div class="owe get">ได้คืน <b>${baht(-net)}</b><br><span class="muted">จาก ${hubName}</span></div>`; status=toggle(id,done,'คืนแล้ว','ยังไม่คืน');
+    } else { what='<div class="owe muted">ไม่ต้องโอน</div>'; status='–'; }
+    return `<tr class="${done&&!isHub&&Math.abs(net)>0.004?'paid':''}" data-id="${id}"><td>${name}${extra||''}</td><td>${what}</td><td class="num">${status}</td></tr>`;
   };
-  const statusCell=r=>{
-    if(r.net<=0.004) return r.net<-0.004?'<span class="recvchip">รอรับเงิน</span>':'–';
-    return VIEW?`<span class="paidchip ${r.paid?'yes':''}">${r.paid?'จ่ายแล้ว':'ยังไม่จ่าย'}</span>`:`<button class="${r.paid?'primary':''}" data-paid style="padding:3px 10px;font-size:13px">${r.paid?'จ่ายแล้ว':'ยังไม่จ่าย'}</button>`;
-  };
-  $('billTable').innerHTML=`<thead><tr><th>ชื่อ</th><th class="num">เล่น</th><th class="num">ส่วนของตัวเอง</th><th>ต้องโอน</th><th class="num">สถานะ</th></tr></thead><tbody>${
-    c.rows.map(r=>`<tr class="${r.paid&&r.net>0?'paid':''}" data-id="${r.p.id}"><td>${esc(r.p.name)}</td><td class="num">${r.games} เกม</td><td class="num">${baht(r.amt)}</td><td>${oweCell(r)}</td><td class="num">${statusCell(r)}</td></tr>`).join('')
-  }${c.extraCreditors.filter(x=>x.k!==c.ORG).map(x=>`<tr><td>${who(x.k)} <span class="muted">(ไม่ได้เล่น)</span></td><td class="num">–</td><td class="num">0</td><td><div class="owe get">ได้คืน <b>${baht(x.front)}</b></div></td><td class="num"><span class="recvchip">รอรับเงิน</span></td></tr>`).join('')}</tbody>`;
+  $('billTable').innerHTML=`<thead><tr><th>ชื่อ</th><th>ต้องโอน</th><th class="num">สถานะ</th></tr></thead><tbody>${
+    c.rows.map(r=>rowFor(r.p.id,esc(r.p.name),r.net,r.isHub)).join('')
+  }${c.extraCreditors.filter(x=>x.k!==c.ORG).map(x=>rowFor(x.k,who(x.k),x.net,x.isHub,' <span class="muted">(ไม่ได้เล่น)</span>')).join('')}</tbody>`;
   const qr=(window.__qr)||DEFAULT_QR; if($('qrImg').src!==qr) $('qrImg').src=qr;
   // the QR is the organiser's: only needed when someone has to pay the organiser
-  const needQR=c.rows.some(r=>r.xfer.some(x=>x.to===c.ORG));
+  const needQR=c.hub===c.ORG||c.hub==null;
   document.querySelector('.qrpanel').hidden=!needQR&&c.total>0;
 }
 function render(remote){renderSetup();renderQueue();renderStats();renderBill();save(remote)}
@@ -875,11 +876,14 @@ $('billCopy').onclick=async()=>{
   const nm=k=>k===c.ORG?'ผู้จัด (QR)':nameOf(k);
   if(b.courtPayer&&P(b.courtPayer))lines.splice(2,0,`  (${nameOf(b.courtPayer)} จ่ายไปก่อน)`);
   if(b.shuttlePayer&&P(b.shuttlePayer))lines.splice(b.courtPayer&&P(b.courtPayer)?4:3,0,`  (${nameOf(b.shuttlePayer)} จ่ายไปก่อน)`);
+  const hubN=c.hub?nm(c.hub):'ผู้จัด (QR)';
+  lines.push(`ทุกคนโอนให้ ${hubN}`);
   c.rows.forEach(r=>{
-    if(r.net>0.004)lines.push(`${r.p.name} โอน ${baht(r.net)} บาท ให้ ${r.xfer.map(x=>r.xfer.length>1?`${nm(x.to)} ${baht(x.amt)}`:nm(x.to)).join(', ')}${r.paid?' (จ่ายแล้ว)':''}`);
-    else if(r.net<-0.004)lines.push(`${r.p.name} ได้คืน ${baht(-r.net)} บาท`);
+    if(r.isHub)return;
+    if(r.net>0.004)lines.push(`${r.p.name} โอน ${baht(r.net)} บาท${b.paid[r.p.id]?' (จ่ายแล้ว)':''}`);
+    else if(r.net<-0.004)lines.push(`${r.p.name} ได้คืน ${baht(-r.net)} บาท จาก ${hubN}`);
   });
-  c.extraCreditors.filter(x=>x.k!==c.ORG).forEach(x=>lines.push(`${nm(x.k)} ได้คืน ${baht(x.front)} บาท`));
+  c.extraCreditors.filter(x=>x.k!==c.ORG&&!x.isHub).forEach(x=>lines.push(`${nm(x.k)} ได้คืน ${baht(x.front)} บาท จาก ${hubN}`));
   const txt=lines.join('\n');
   try{await navigator.clipboard.writeText(txt);toast('คัดลอกยอดแล้ว วางใน LINE ได้เลย')}
   catch(err){$('billCopyWrap').hidden=false;$('billCopyText').value=txt;$('billCopyText').select()}
