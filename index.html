@@ -453,7 +453,7 @@ img{max-width:100%}
         <div class="tablewrap"><table id="leaderboard"></table></div>
       </section>
       <section class="panel" aria-label="ผลแต่ละแมตช์">
-        <div class="row between"><h2>ผลแต่ละแมตช์</h2><span class="note editor-only">แตะทีมเพื่อแก้ผล · ชนะ 1 แพ้ 0</span></div>
+        <div class="row between"><h2>ผลแต่ละแมตช์</h2><span class="note">ชนะ 1 · ชนะทีมที่เก่งกว่าได้โบนัส · แพ้ 0</span></div>
         <ol class="results" id="results"></ol>
       </section>
     </div>
@@ -883,20 +883,28 @@ function medal(n){
   return `<svg class="medal" viewBox="0 0 24 28" aria-label="อันดับ ${n}" role="img"><path d="M6 1h5l3 8H9z" fill="#3F7CC4"/><path d="M18 1h-5l-3 8h5z" fill="#E3141B"/><circle cx="12" cy="18" r="8.5" fill="${c[0]}" stroke="${c[1]}" stroke-width="1.6"/><text x="12" y="22" text-anchor="middle" font-size="10" font-weight="700" font-family="Chakra Petch,system-ui,sans-serif" fill="${c[1]}">${n}</text></svg>`;
 }
 const MIN_GAMES=2;
+// strength: level 1 (เลิศ) = 3, level 2 (ชิล) = 2, level 3 (หอบ) = 1
+const strength=id=>4-lvOf(id);
+// winning against a stronger pair earns a bonus of 0.5 per level of difference
+function winPoints(m,side){
+  const mine=m[side].reduce((s,id)=>s+strength(id),0), opp=m[side==='a'?'b':'a'].reduce((s,id)=>s+strength(id),0);
+  return 1+0.5*Math.max(0,opp-mine);
+}
+function setResult(m,side){m.win=side||null;m.pw=side?winPoints(m,side):null}
+const fmtPts=x=>(Math.round(x*100)/100).toLocaleString('th-TH',{maximumFractionDigits:2});
 function scoreTable(){
   const t={};
-  const row=id=>t[id]=t[id]||{id,p:0,w:0,l:0,pf:0,pa:0};
+  const row=id=>t[id]=t[id]||{id,p:0,w:0,l:0,pts:0};
   S.matches.forEach(m=>{
     if(!m.done||!m.win)return;
-    const sa=m.sa===''||m.sa==null?null:+m.sa, sb=m.sb===''||m.sb==null?null:+m.sb;
-    [['a',m.a,sa,sb],['b',m.b,sb,sa]].forEach(([side,team,f,ag])=>team.forEach(id=>{
-      const r=row(id); r.p++; if(m.win===side)r.w++; else r.l++;
-      if(f!=null&&ag!=null){r.pf+=f;r.pa+=ag;}
+    const pw=m.pw!=null?m.pw:winPoints(m,m.win);
+    [['a',m.a],['b',m.b]].forEach(([side,team])=>team.forEach(id=>{
+      const r=row(id); r.p++; if(m.win===side){r.w++;r.pts+=pw} else r.l++;
     }));
   });
-  // rank by win rate; people with fewer than MIN_GAMES matches are listed but not ranked yet
-  return Object.values(t).filter(r=>P(r.id)).map(r=>({...r,pct:r.w/r.p,ok:r.p>=MIN_GAMES}))
-    .sort((x,y)=>(y.ok-x.ok)||y.pct-x.pct||y.w-x.w||x.l-y.l||nameOf(x.id).localeCompare(nameOf(y.id),'th'));
+  // rank by average points per match; fewer than MIN_GAMES matches = listed but not ranked yet
+  return Object.values(t).filter(r=>P(r.id)).map(r=>({...r,avg:r.pts/r.p,ok:r.p>=MIN_GAMES}))
+    .sort((x,y)=>(y.ok-x.ok)||y.avg-x.avg||y.pts-x.pts||x.l-y.l||nameOf(x.id).localeCompare(nameOf(y.id),'th'));
 }
 function renderScore(){
   $('scoreSwitch').setAttribute('aria-checked',!!S.scoreVisible);
@@ -905,20 +913,20 @@ function renderScore(){
   const recorded=S.matches.filter(m=>m.done&&m.win).length, doneN=S.matches.filter(m=>m.done).length;
   $('lbNote').textContent=doneN?`บันทึกผลแล้ว ${recorded} จาก ${doneN} แมตช์`:'';
   let rank=0,prev=null;
-  const pctTxt=r=>`${Math.round(r.pct*100)}%`;
+  const avgTxt=r=>r.avg.toFixed(2);
   let firstPending=true;
-  $('leaderboard').innerHTML=`<thead><tr><th>#</th><th>ชื่อ</th><th class="num">แข่ง</th><th class="num">ชนะ</th><th class="num">แพ้</th><th class="num">% ชนะ</th></tr></thead><tbody>${
+  $('leaderboard').innerHTML=`<thead><tr><th>#</th><th>ชื่อ</th><th class="num">แข่ง</th><th class="num">ชนะ-แพ้</th><th class="num">คะแนน</th><th class="num">เฉลี่ย</th></tr></thead><tbody>${
     rows.map(r=>{
       if(!r.ok){
         const sep=firstPending?`<tr class="pending-sep"><td colspan="6">ยังไม่ติดอันดับ · ต้องเล่นอย่างน้อย ${MIN_GAMES} แมตช์</td></tr>`:''; firstPending=false;
-        return sep+`<tr class="pending"><td class="rank">–</td><td>${esc(nameOf(r.id))}</td><td class="num">${r.p}</td><td class="num wl"><span class="w">${r.w}</span></td><td class="num wl"><span class="l">${r.l}</span></td><td class="num">${pctTxt(r)}</td></tr>`;
+        return sep+`<tr class="pending"><td class="rank">–</td><td>${esc(nameOf(r.id))}</td><td class="num">${r.p}</td><td class="num wl"><span class="w">${r.w}</span>-<span class="l">${r.l}</span></td><td class="num">${fmtPts(r.pts)}</td><td class="num">${avgTxt(r)}</td></tr>`;
       }
-      const key=`${r.pct}|${r.w}|${r.l}`;if(key!==prev){rank++;prev=key}
-      return `<tr class="${rank<=3?'top'+rank:''}"><td class="rank">${rank}</td><td><span class="lbname">${rank<=3?medal(rank):''}${esc(nameOf(r.id))}</span></td><td class="num">${r.p}</td><td class="num wl"><span class="w">${r.w}</span></td><td class="num wl"><span class="l">${r.l}</span></td><td class="num"><b class="num">${pctTxt(r)}</b></td></tr>`}).join('')
+      const key=`${r.avg}|${r.pts}|${r.l}`;if(key!==prev){rank++;prev=key}
+      return `<tr class="${rank<=3?'top'+rank:''}"><td class="rank">${rank}</td><td><span class="lbname">${rank<=3?medal(rank):''}${esc(nameOf(r.id))}</span></td><td class="num">${r.p}</td><td class="num wl"><span class="w">${r.w}</span>-<span class="l">${r.l}</span></td><td class="num">${fmtPts(r.pts)}</td><td class="num"><b class="num">${avgTxt(r)}</b></td></tr>`}).join('')
     ||`<tr><td colspan="6" class="muted">ยังไม่มีผลแข่ง${VIEW?'':' · กดปุ่ม "ชนะ" ที่แมตช์ที่กำลังเล่นในหน้าคิว'}</td></tr>`}</tbody>`;
   const done=S.matches.map((m,i)=>({m,i})).filter(x=>x.m.done).reverse();
   $('results').innerHTML=done.map(({m,i})=>{
-    const team=(side,ids2)=>{const tag=VIEW?'div':'button';return `<${tag} ${VIEW?'':'type="button"'} class="team ${side}${m.win===side?' win':m.win?' lose':''}" data-win="${side}">${m.win===side?'<span class="wtag">ชนะ</span>':''}${ids2.map(id=>`<span>${esc(nameOf(id))}</span>`).join('')}</${tag}>`};
+    const team=(side,ids2)=>{const tag=VIEW?'div':'button';return `<${tag} ${VIEW?'':'type="button"'} class="team ${side}${m.win===side?' win':m.win?' lose':''}" data-win="${side}">${m.win===side?`<span class="wtag">ชนะ +${fmtPts(m.pw!=null?m.pw:winPoints(m,side))}</span>`:''}${ids2.map(id=>`<span>${esc(nameOf(id))}</span>`).join('')}</${tag}>`};
     const mid='<span class="vsx">vs</span>';
     return `<li class="res" data-mid="${m.id}"><span class="no">#${i+1}</span>${team('a',m.a)}<div class="mid">${mid}</div>${team('b',m.b)}</li>`;
   }).join('')||'<li class="muted">ยังไม่มีแมตช์ที่จบ</li>';
@@ -973,7 +981,7 @@ $('playerList').addEventListener('change',e=>{
 $('queueWrap').addEventListener('click',e=>{
   const li=e.target.closest('[data-mid]');if(!li)return;const m=S.matches.find(x=>x.id===li.dataset.mid);if(!m)return;
   const wq=e.target.closest('[data-winq]');
-  if(wq){S.sample=false;m.done=true;m.win=wq.dataset.winq;topUp();render();toast(`${m[m.win].map(nameOf).join(' + ')} ชนะ +1`);return}
+  if(wq){S.sample=false;m.done=true;setResult(m,wq.dataset.winq);topUp();render();toast(`${m[m.win].map(nameOf).join(' + ')} ชนะ +${fmtPts(m.pw)}`);return}
   if(e.target.closest('[data-done]')){S.sample=false;m.done=true;topUp();render()}
   else if(e.target.closest('[data-undo]')){m.done=false;topUp();render()}
   else{const nb=e.target.closest('.nbtn'); if(nb&&!m.done&&!VIEW) askAbsent(nb.dataset.pid,m.id);}
@@ -1034,7 +1042,7 @@ $('qrFile').addEventListener('change',e=>{
 $('winA').onclick=()=>setWin('a');$('winB').onclick=()=>setWin('b');$('winSkip').onclick=()=>{$('winSheet').hidden=true};
 $('scoreSwitch').addEventListener('click',()=>{if(VIEW)return;S.scoreVisible=!S.scoreVisible;render();toast(S.scoreVisible?'เปิดหน้าคะแนนให้เพื่อนแล้ว':'ปิดหน้าคะแนนจากเพื่อนแล้ว')});
 $('results').addEventListener('click',e=>{if(VIEW)return;const t=e.target.closest('[data-win]');if(!t)return;const m=S.matches.find(x=>x.id===t.closest('[data-mid]').dataset.mid);if(!m)return;
-  m.win=m.win===t.dataset.win?null:t.dataset.win;render()});
+  setResult(m,m.win===t.dataset.win?null:t.dataset.win);render()});
 $('results').addEventListener('change',e=>{if(VIEW)return;const t=e.target.closest('[data-sc]');if(!t)return;const m=S.matches.find(x=>x.id===t.closest('[data-mid]').dataset.mid);if(!m)return;
   const v=t.value===''?'':Math.max(0,Math.min(99,parseInt(t.value,10)||0));m[t.dataset.sc]=v;
   // auto-pick the winner from the score when both are filled
