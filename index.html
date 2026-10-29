@@ -102,7 +102,7 @@ details[open] summary{margin-bottom:8px}
 
 /* queue */
 .queue{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
-.m{display:grid;grid-template-columns:56px minmax(0,1fr) 112px;gap:10px;align-items:center}
+.m{display:grid;grid-template-columns:56px minmax(0,1fr) 150px;gap:10px;align-items:center}
 .m .no{font-family:var(--display);font-weight:700;font-size:22px;line-height:1;text-align:center;font-variant-numeric:tabular-nums}
 .m .no small{display:block;font-family:var(--body);font-size:11px;font-weight:500;color:var(--muted);margin-top:4px}
 .court{position:relative;border-radius:7px;overflow:hidden;background:linear-gradient(90deg,var(--court) 0 50%,var(--court-2) 50% 100%);color:var(--on-court);display:grid;grid-template-columns:1fr 1fr;border:2px solid var(--court-line)}
@@ -288,6 +288,49 @@ body[data-tab=players] .queue-panel,body[data-tab=players] .stats-panel{display:
 .owe.get{color:#08813F}
 .owe.get b{color:#08813F}
 .recvchip{font-size:12px;font-weight:600;border-radius:999px;padding:1px 10px;background:#DDFBE9;color:#08813F}
+.score-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:860px){.score-grid{grid-template-columns:minmax(0,1fr)}}
+.rank{font-family:var(--display);font-weight:700;color:var(--muted);width:28px}
+tr.top1 .rank{color:#C99400} tr.top2 .rank{color:#8A97A3} tr.top3 .rank{color:#B0703A}
+tr.top1 td:nth-child(2){font-weight:700}
+.wl{font-family:var(--display);font-variant-numeric:tabular-nums}
+.wl .w{color:#08813F;font-weight:700}.wl .l{color:var(--danger);font-weight:700}
+.results{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.res{display:grid;grid-template-columns:44px minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.res .no{font-family:var(--display);font-weight:700;color:var(--muted);font-size:13px;text-align:center}
+.team{all:unset;box-sizing:border-box;cursor:pointer;border-radius:8px;padding:6px 8px;border:1.5px solid var(--line);display:flex;flex-direction:column;gap:2px;min-width:0;font-weight:600;font-size:14px;line-height:1.3}
+.team.b{text-align:right}
+.team span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.team.win{border-color:#0DB25B;background:#DDFBE9;color:#065F2E}
+.team.lose{opacity:.55}
+.team:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.viewonly .team{cursor:default}
+.res .mid{display:flex;flex-direction:column;align-items:center;gap:4px}
+.res .mid input{width:44px;text-align:center;font:inherit;font-family:var(--display);font-size:16px;padding:4px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.res .mid .sc{font-family:var(--display);font-weight:700;font-size:15px;white-space:nowrap}
+.res .mid .vsx{font-size:11px;color:var(--muted)}
+.res .wtag{font-size:10px;font-weight:700;letter-spacing:.04em;color:#08813F}
+.sheet-title{font-family:var(--display);font-weight:700;font-size:18px}
+.winpick{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:center}
+.winbtn{padding:14px 10px;font-weight:700;font-size:16px;border-radius:12px;border:2px solid var(--line);line-height:1.35}
+.winbtn:hover{border-color:#0DB25B;background:#DDFBE9;color:#065F2E}
+.m.done .side.won .pl .n{color:var(--ink);font-weight:800}
+.wonbadge{font-size:10px;font-weight:700;color:#08813F;letter-spacing:.04em}
+.qwin{display:flex;align-items:center;justify-content:center;gap:4px;min-width:0;font-size:13px;padding:6px 8px}
+.qwin span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.m.playing .act .qwin{background:#E3141B;border-color:#E3141B;color:#fff;font-weight:700}
+.m.playing .act .qwin:hover{background:#C80F15}
+.qskip{font-size:12px!important;padding:2px 4px!important;color:var(--muted)}
+.m.playing .act .chip{display:none}
+@media (max-width:520px){
+  .m.playing .act{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+  .m.playing .act .qwin{width:auto!important;padding:10px 8px!important;font-size:14px!important}
+  .m.playing .act .qskip{grid-column:1/-1;justify-self:end}
+}
+.lbname{display:inline-flex;align-items:center;gap:6px}
+.medal{width:20px;height:24px;flex:none}
+.pending td{color:var(--muted)}
+.pending-sep td{font-size:12px;color:var(--muted);padding-top:14px;border-bottom:1px dashed var(--line)}
 .warnline{color:var(--danger)}
 .divider{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);letter-spacing:.04em;margin:6px 0 2px}
 .divider::after{content:"";flex:1;border-top:1px solid var(--line)}
@@ -330,6 +373,7 @@ img{max-width:100%}
   <nav class="tabs" role="tablist">
     <button role="tab" id="tabBtnQueue" aria-selected="true" data-tab="queue">คิวแมตช์</button>
     <button role="tab" id="tabBtnPlayers" class="editor-only" aria-selected="false" data-tab="players">ผู้เล่น</button>
+    <button role="tab" id="tabBtnScore" aria-selected="false" data-tab="score">คะแนน</button>
     <button role="tab" id="tabBtnBill" aria-selected="false" data-tab="bill">คิดเงิน</button>
   </nav>
 
@@ -398,6 +442,23 @@ img{max-width:100%}
   </section>
   </div>
 
+  <div id="tabScore" hidden>
+    <div class="score-grid">
+      <section class="panel" aria-label="ตารางคะแนน">
+        <div class="editor-only billswitch">
+          <div><div class="label">หน้าคะแนนในลิงก์เพื่อน</div><div class="note" id="scoreSwitchNote"></div></div>
+          <button type="button" class="switch" id="scoreSwitch" role="switch" aria-checked="false" aria-label="แสดงหน้าคะแนนให้เพื่อน"><span></span></button>
+        </div>
+        <div class="row between"><h2>ตารางคะแนนรายคน</h2><span class="note" id="lbNote"></span></div>
+        <div class="tablewrap"><table id="leaderboard"></table></div>
+      </section>
+      <section class="panel" aria-label="ผลแต่ละแมตช์">
+        <div class="row between"><h2>ผลแต่ละแมตช์</h2><span class="note editor-only">แตะทีมเพื่อแก้ผล · ชนะ 1 แพ้ 0</span></div>
+        <ol class="results" id="results"></ol>
+      </section>
+    </div>
+  </div>
+
   <div id="tabBill" hidden>
     <div class="bill-grid">
       <section class="panel" aria-label="ค่าใช้จ่าย">
@@ -448,6 +509,13 @@ img{max-width:100%}
         </div>
       </section>
     </div>
+  </div>
+</div>
+<div class="sheet" id="winSheet" hidden>
+  <div class="sheet-in">
+    <div id="winTitle" class="sheet-title"></div>
+    <div class="winpick"><button type="button" class="winbtn" id="winA"></button><span class="muted">vs</span><button type="button" class="winbtn" id="winB"></button></div>
+    <div class="row" style="justify-content:flex-end"><button class="ghost" id="winSkip">ข้ามไปก่อน</button></div>
   </div>
 </div>
 <div class="sheet" id="absentSheet" hidden>
@@ -506,7 +574,7 @@ function norm(d){
   const arr=x=>Array.isArray(x)?x.filter(Boolean):Object.values(x||{});
   d.players=arr(d.players).map(p=>({offset:0,deleted:false,active:false,level:2,...p}));
   d.matches=arr(d.matches).map(m=>({done:false,...m,a:arr(m.a),b:arr(m.b)}));
-  d.courts=d.courts||2; d.ahead=d.ahead||6; d.sample=!!d.sample; d.bill=billDefaults(d.bill); migrateLevels(d);
+  d.courts=d.courts||2; d.ahead=d.ahead||6; d.sample=!!d.sample; d.bill=billDefaults(d.bill); d.scoreVisible=!!d.scoreVisible; migrateLevels(d);
   return d;
 }
 
@@ -604,7 +672,7 @@ function rosterChange(fn){trimToLocked();fn();topUp();render()}
 const lvChip=l=>`<i class="lv l${l}">${l}</i>`;
 const LVNAME={1:'เลิศ',2:'ชิล',3:'หอบ'};
 const segHTML=(val,attr)=>[1,2,3].map(l=>`<button type="button" class="l${l}" data-l="${l}" ${attr||''} aria-pressed="${val===l}" aria-label="ระดับ ${l} ${LVNAME[l]}" title="${LVNAME[l]}">${l}</button>`).join('');
-function sideHTML(t,cls){return `<div class="side ${cls}">${t.map(id=>`<div class="pl${id===ME?' me':''}">${VIEW?'':`<i class="lv l${lvOf(id)} qlv">${lvOf(id)}</i>`}${VIEW?`<span class="n">${esc(nameOf(id))}</span>`:`<button type="button" class="n nbtn" data-pid="${id}" title="แตะถ้าคนนี้ยังไม่มา">${esc(nameOf(id))}</button>`}</div>`).join('')}</div>`}
+function sideHTML(t,cls){return `<div class="side ${cls}">${/won/.test(cls)?'<span class="wonbadge">ชนะ</span>':''}${t.map(id=>`<div class="pl${id===ME?' me':''}">${VIEW?'':`<i class="lv l${lvOf(id)} qlv">${lvOf(id)}</i>`}${VIEW?`<span class="n">${esc(nameOf(id))}</span>`:`<button type="button" class="n nbtn" data-pid="${id}" title="แตะถ้าคนนี้ยังไม่มา">${esc(nameOf(id))}</button>`}</div>`).join('')}</div>`}
 let ME=null;
 const LABEL={done:'จบแล้ว',playing:'กำลังเล่น',next:'ถัดไป',wait:'รอคิว'};
 
@@ -636,11 +704,11 @@ function renderQueue(){
       if(!shownDiv && s!=='done' && doneCount){html+=`<li class="divider">จบไปแล้ว ${doneCount} แมตช์</li>`;shownDiv=true}
       html+=`<li class="m ${s}" data-mid="${m.id}">
         <div class="no">${i+1}<small class="lbl">แมตช์</small><small class="st">${LABEL[s]}</small></div>
-        <div class="court">${sideHTML(m.a,'a')}<span class="vs">VS</span>${sideHTML(m.b,'b')}</div>
+        <div class="court">${sideHTML(m.a,'a'+(m.win==='a'?' won':''))}<span class="vs">VS</span>${sideHTML(m.b,'b'+(m.win==='b'?' won':''))}</div>
         <div class="act"><span class="chip ${s}">${LABEL[s]}</span>${VIEW?'':(
-          s==='playing'?'<button class="primary" data-done>จบแล้ว</button>':
-          s==='done'?'<button class="ghost" data-undo>ยังไม่จบ</button>':
-          '<button class="ghost" data-done>จบแล้ว</button>')}</div>
+          s==='playing'?`<button class="primary qwin" data-winq="a"><span>${m.a.map(nameOf).map(esc).join(' + ')}</span> ชนะ</button><button class="primary qwin" data-winq="b"><span>${m.b.map(nameOf).map(esc).join(' + ')}</span> ชนะ</button>`:
+          s==='done'?'':
+          '')}</div>
       </li>`;
       ids(m).forEach(id=>{if(id in cnt)cnt[id]++});
       const vals=Object.values(cnt);
@@ -774,7 +842,6 @@ function renderBill(){
   const b=S.bill, c=billCalc();
   $('billSwitch').setAttribute('aria-checked',!!b.visible);
   $('billSwitchNote').textContent=b.visible?'เปิดอยู่ · เพื่อนเห็นยอดและ QR':'ปิดอยู่ · เพื่อนยังไม่เห็นแท็บนี้';
-  if(VIEW){ $('tabBtnBill').hidden=!b.visible; document.querySelector('.tabs').hidden=!b.visible; if(!b.visible&&curTab==='bill') showTab('queue'); }
   Object.entries(BF).forEach(([id,k])=>{const el=$(id);el.disabled=VIEW;if(document.activeElement!==el)el.value=b[k]??''});
   $('bMode').querySelectorAll('button').forEach(x=>{x.setAttribute('aria-pressed',x.dataset.mode===b.mode);x.disabled=VIEW});
   $('bCourtSum').textContent=baht(c.courtSum)+' บาท'; $('bShuttleSum').textContent=baht(c.shuttleSum)+' บาท';
@@ -810,7 +877,68 @@ function renderBill(){
   const needQR=c.hub===c.ORG||c.hub==null;
   document.querySelector('.qrpanel').hidden=!needQR&&c.total>0;
 }
-function render(remote){renderSetup();renderQueue();renderStats();renderBill();save(remote)}
+/* ---------- scores ---------- */
+function medal(n){
+  const c={1:['#F5C542','#C99400'],2:['#D9DEE3','#8A97A3'],3:['#E0A26B','#A8632F']}[n];
+  return `<svg class="medal" viewBox="0 0 24 28" aria-label="อันดับ ${n}" role="img"><path d="M6 1h5l3 8H9z" fill="#3F7CC4"/><path d="M18 1h-5l-3 8h5z" fill="#E3141B"/><circle cx="12" cy="18" r="8.5" fill="${c[0]}" stroke="${c[1]}" stroke-width="1.6"/><text x="12" y="22" text-anchor="middle" font-size="10" font-weight="700" font-family="Chakra Petch,system-ui,sans-serif" fill="${c[1]}">${n}</text></svg>`;
+}
+const MIN_GAMES=2;
+function scoreTable(){
+  const t={};
+  const row=id=>t[id]=t[id]||{id,p:0,w:0,l:0,pf:0,pa:0};
+  S.matches.forEach(m=>{
+    if(!m.done||!m.win)return;
+    const sa=m.sa===''||m.sa==null?null:+m.sa, sb=m.sb===''||m.sb==null?null:+m.sb;
+    [['a',m.a,sa,sb],['b',m.b,sb,sa]].forEach(([side,team,f,ag])=>team.forEach(id=>{
+      const r=row(id); r.p++; if(m.win===side)r.w++; else r.l++;
+      if(f!=null&&ag!=null){r.pf+=f;r.pa+=ag;}
+    }));
+  });
+  // rank by win rate; people with fewer than MIN_GAMES matches are listed but not ranked yet
+  return Object.values(t).filter(r=>P(r.id)).map(r=>({...r,pct:r.w/r.p,ok:r.p>=MIN_GAMES}))
+    .sort((x,y)=>(y.ok-x.ok)||y.pct-x.pct||y.w-x.w||x.l-y.l||nameOf(x.id).localeCompare(nameOf(y.id),'th'));
+}
+function renderScore(){
+  $('scoreSwitch').setAttribute('aria-checked',!!S.scoreVisible);
+  $('scoreSwitchNote').textContent=S.scoreVisible?'เปิดอยู่ · เพื่อนเห็นตารางคะแนน':'ปิดอยู่ · เพื่อนยังไม่เห็นแท็บนี้';
+  const rows=scoreTable();
+  const recorded=S.matches.filter(m=>m.done&&m.win).length, doneN=S.matches.filter(m=>m.done).length;
+  $('lbNote').textContent=doneN?`บันทึกผลแล้ว ${recorded} จาก ${doneN} แมตช์`:'';
+  let rank=0,prev=null;
+  const pctTxt=r=>`${Math.round(r.pct*100)}%`;
+  let firstPending=true;
+  $('leaderboard').innerHTML=`<thead><tr><th>#</th><th>ชื่อ</th><th class="num">แข่ง</th><th class="num">ชนะ</th><th class="num">แพ้</th><th class="num">% ชนะ</th></tr></thead><tbody>${
+    rows.map(r=>{
+      if(!r.ok){
+        const sep=firstPending?`<tr class="pending-sep"><td colspan="6">ยังไม่ติดอันดับ · ต้องเล่นอย่างน้อย ${MIN_GAMES} แมตช์</td></tr>`:''; firstPending=false;
+        return sep+`<tr class="pending"><td class="rank">–</td><td>${esc(nameOf(r.id))}</td><td class="num">${r.p}</td><td class="num wl"><span class="w">${r.w}</span></td><td class="num wl"><span class="l">${r.l}</span></td><td class="num">${pctTxt(r)}</td></tr>`;
+      }
+      const key=`${r.pct}|${r.w}|${r.l}`;if(key!==prev){rank++;prev=key}
+      return `<tr class="${rank<=3?'top'+rank:''}"><td class="rank">${rank}</td><td><span class="lbname">${rank<=3?medal(rank):''}${esc(nameOf(r.id))}</span></td><td class="num">${r.p}</td><td class="num wl"><span class="w">${r.w}</span></td><td class="num wl"><span class="l">${r.l}</span></td><td class="num"><b class="num">${pctTxt(r)}</b></td></tr>`}).join('')
+    ||`<tr><td colspan="6" class="muted">ยังไม่มีผลแข่ง${VIEW?'':' · กดปุ่ม "ชนะ" ที่แมตช์ที่กำลังเล่นในหน้าคิว'}</td></tr>`}</tbody>`;
+  const done=S.matches.map((m,i)=>({m,i})).filter(x=>x.m.done).reverse();
+  $('results').innerHTML=done.map(({m,i})=>{
+    const team=(side,ids2)=>{const tag=VIEW?'div':'button';return `<${tag} ${VIEW?'':'type="button"'} class="team ${side}${m.win===side?' win':m.win?' lose':''}" data-win="${side}">${m.win===side?'<span class="wtag">ชนะ</span>':''}${ids2.map(id=>`<span>${esc(nameOf(id))}</span>`).join('')}</${tag}>`};
+    const mid='<span class="vsx">vs</span>';
+    return `<li class="res" data-mid="${m.id}"><span class="no">#${i+1}</span>${team('a',m.a)}<div class="mid">${mid}</div>${team('b',m.b)}</li>`;
+  }).join('')||'<li class="muted">ยังไม่มีแมตช์ที่จบ</li>';
+}
+function updateViewTabs(){
+  if(!VIEW)return;
+  const bill=!!S.bill.visible, sc=!!S.scoreVisible;
+  $('tabBtnBill').hidden=!bill; $('tabBtnScore').hidden=!sc;
+  document.querySelector('.tabs').hidden=!(bill||sc);
+  if((curTab==='bill'&&!bill)||(curTab==='score'&&!sc)) showTab('queue');
+}
+let winMid=null;
+function askWinner(mid){
+  const m=S.matches.find(x=>x.id===mid); if(!m||VIEW)return; winMid=mid;
+  $('winTitle').textContent=`แมตช์ ${S.matches.indexOf(m)+1} ใครชนะ?`;
+  $('winA').innerHTML=m.a.map(id=>esc(nameOf(id))).join('<br>'); $('winB').innerHTML=m.b.map(id=>esc(nameOf(id))).join('<br>');
+  $('winSheet').hidden=false;
+}
+function setWin(side){const m=S.matches.find(x=>x.id===winMid);$('winSheet').hidden=true;if(!m)return;m.win=side;render();toast('บันทึกผลแล้ว')}
+function render(remote){renderSetup();renderQueue();renderStats();renderBill();renderScore();updateViewTabs();save(remote)}
 function toast(t){const e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,1800)}
 
 /* ---------- actions ---------- */
@@ -844,6 +972,8 @@ $('playerList').addEventListener('change',e=>{
 });
 $('queueWrap').addEventListener('click',e=>{
   const li=e.target.closest('[data-mid]');if(!li)return;const m=S.matches.find(x=>x.id===li.dataset.mid);if(!m)return;
+  const wq=e.target.closest('[data-winq]');
+  if(wq){S.sample=false;m.done=true;m.win=wq.dataset.winq;topUp();render();toast(`${m[m.win].map(nameOf).join(' + ')} ชนะ +1`);return}
   if(e.target.closest('[data-done]')){S.sample=false;m.done=true;topUp();render()}
   else if(e.target.closest('[data-undo]')){m.done=false;topUp();render()}
   else{const nb=e.target.closest('.nbtn'); if(nb&&!m.done&&!VIEW) askAbsent(nb.dataset.pid,m.id);}
@@ -901,18 +1031,28 @@ $('qrFile').addEventListener('change',e=>{
     renderBill();toast('เปลี่ยนรูป QR แล้ว');URL.revokeObjectURL(img.src);
   };img.src=URL.createObjectURL(file);
 });
+$('winA').onclick=()=>setWin('a');$('winB').onclick=()=>setWin('b');$('winSkip').onclick=()=>{$('winSheet').hidden=true};
+$('scoreSwitch').addEventListener('click',()=>{if(VIEW)return;S.scoreVisible=!S.scoreVisible;render();toast(S.scoreVisible?'เปิดหน้าคะแนนให้เพื่อนแล้ว':'ปิดหน้าคะแนนจากเพื่อนแล้ว')});
+$('results').addEventListener('click',e=>{if(VIEW)return;const t=e.target.closest('[data-win]');if(!t)return;const m=S.matches.find(x=>x.id===t.closest('[data-mid]').dataset.mid);if(!m)return;
+  m.win=m.win===t.dataset.win?null:t.dataset.win;render()});
+$('results').addEventListener('change',e=>{if(VIEW)return;const t=e.target.closest('[data-sc]');if(!t)return;const m=S.matches.find(x=>x.id===t.closest('[data-mid]').dataset.mid);if(!m)return;
+  const v=t.value===''?'':Math.max(0,Math.min(99,parseInt(t.value,10)||0));m[t.dataset.sc]=v;
+  // auto-pick the winner from the score when both are filled
+  if(m.sa!==''&&m.sa!=null&&m.sb!==''&&m.sb!=null&&m.sa!==m.sb)m.win=m.sa>m.sb?'a':'b';
+  render()});
 // tabs
 let curTab='queue';
 function showTab(t){
   if(t==='players'&&VIEW)t='queue';
   curTab=t; document.body.dataset.tab=t;
-  $('tabQueue').hidden=t==='bill';$('tabBill').hidden=t!=='bill';
-  [['tabBtnQueue','queue'],['tabBtnPlayers','players'],['tabBtnBill','bill']].forEach(([id,k])=>$(id).setAttribute('aria-selected',t===k));
+  $('tabQueue').hidden=t==='bill'||t==='score';$('tabBill').hidden=t!=='bill';$('tabScore').hidden=t!=='score';
+  [['tabBtnQueue','queue'],['tabBtnPlayers','players'],['tabBtnScore','score'],['tabBtnBill','bill']].forEach(([id,k])=>$(id).setAttribute('aria-selected',t===k));
   window.scrollTo({top:0});
 }
 document.querySelector('.tabs').addEventListener('click',e=>{const x=e.target.closest('[data-tab]');if(x)showTab(x.dataset.tab)});
 let startTab='queue';
 if(location.hash==='#bill')startTab='bill';
+if(location.hash==='#score')startTab='score';
 showTab(startTab);
 
 
