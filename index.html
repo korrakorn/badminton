@@ -913,7 +913,7 @@ function renderScore(){
   const recorded=S.matches.filter(m=>m.done&&m.win).length, doneN=S.matches.filter(m=>m.done).length;
   $('lbNote').textContent=doneN?`บันทึกผลแล้ว ${recorded} จาก ${doneN} แมตช์`:'';
   let rank=0,prev=null;
-  const avgTxt=r=>r.avg.toFixed(2);
+  const avgTxt=r=>`${Math.round(r.avg*100)}%`;
   let firstPending=true;
   $('leaderboard').innerHTML=`<thead><tr><th>#</th><th>ชื่อ</th><th class="num">แข่ง</th><th class="num">ชนะ-แพ้</th><th class="num">คะแนน</th><th class="num">เฉลี่ย</th></tr></thead><tbody>${
     rows.map(r=>{
